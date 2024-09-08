@@ -25,11 +25,8 @@ public class Orden {
     @EqualsAndHashCode.Include
     private String id;
 
-    @Id
     private ObjectId idCliente;
-    @Id
     private ObjectId idCupon;
-
     private LocalDateTime fecha;
     private String codigoPasarela;
     private Pago pago;

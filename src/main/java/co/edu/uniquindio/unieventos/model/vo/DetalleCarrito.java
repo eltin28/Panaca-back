@@ -14,7 +14,5 @@ public class DetalleCarrito {
 
     private int cantidad;
     private String nombreLocalidad;
-
-    @Id
     private ObjectId idEvento;
 }

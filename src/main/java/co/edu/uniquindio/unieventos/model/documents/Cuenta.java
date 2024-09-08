@@ -3,19 +3,17 @@ package co.edu.uniquindio.unieventos.model.documents;
 
 import co.edu.uniquindio.unieventos.model.enums.EstadoCuenta;
 import co.edu.uniquindio.unieventos.model.enums.Rol;
-import jakarta.validation.GroupSequence;
+import co.edu.uniquindio.unieventos.model.vo.Usuario;
 import lombok.*;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Document("Cuenta")
 @Data
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -25,15 +23,24 @@ public class Cuenta {
     @EqualsAndHashCode.Include
     private String id;
 
-    @Id
-    private ObjectId idUsuario;
-
+    private Usuario Usuario;
     private String email;
     private String password;
-    private String codigoVerificacion;
+    private String codigoVerificacionRegistro;
     private String codigoVerificacionContrasenia;
-    private LocalDate fechaRegistro;
+    private LocalDateTime fechaRegistro;
     private Rol rol;
-    EstadoCuenta estado;
+    private EstadoCuenta estado;
 
+    @Builder
+    public Cuenta(co.edu.uniquindio.unieventos.model.vo.Usuario usuario, String email, String password, String codigoVerificacion, String codigoVerificacionContrasenia, LocalDateTime fechaRegistro, Rol rol, EstadoCuenta estado) {
+        Usuario = usuario;
+        this.email = email;
+        this.password = password;
+        this.codigoVerificacionRegistro = codigoVerificacion;
+        this.codigoVerificacionContrasenia = codigoVerificacionContrasenia;
+        this.fechaRegistro = fechaRegistro;
+        this.rol = rol;
+        this.estado = estado;
+    }
 }
