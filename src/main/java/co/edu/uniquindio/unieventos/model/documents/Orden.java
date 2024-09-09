@@ -30,7 +30,7 @@ public class Orden {
     private LocalDateTime fecha;
     private String codigoPasarela;
     private Pago pago;
-    private List<DetalleOrden> items;
+    private List<DetalleOrden> detalle;
     private float total;
 
 
