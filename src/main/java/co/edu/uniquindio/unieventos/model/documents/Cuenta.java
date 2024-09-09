@@ -23,7 +23,7 @@ public class Cuenta {
     @EqualsAndHashCode.Include
     private String id;
 
-    private Usuario Usuario;
+    private Usuario usuario;
     private String email;
     private String password;
     private String codigoVerificacionRegistro;
@@ -33,8 +33,8 @@ public class Cuenta {
     private EstadoCuenta estado;
 
     @Builder
-    public Cuenta(co.edu.uniquindio.unieventos.model.vo.Usuario usuario, String email, String password, String codigoVerificacion, String codigoVerificacionContrasenia, LocalDateTime fechaRegistro, Rol rol, EstadoCuenta estado) {
-        Usuario = usuario;
+    public Cuenta(Usuario usuario, String email, String password, String codigoVerificacion, String codigoVerificacionContrasenia, LocalDateTime fechaRegistro, Rol rol, EstadoCuenta estado) {
+        this.usuario = usuario;
         this.email = email;
         this.password = password;
         this.codigoVerificacionRegistro = codigoVerificacion;

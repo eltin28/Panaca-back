@@ -23,7 +23,8 @@ public class Pago {
     private String detalleEstado;
     private String codigoAutorizacion;
     private String estado;
-    private float valorTransaccion;
+    private String metodoPago;
+    private float totalPagado;
     private LocalDateTime fecha;
 
 }

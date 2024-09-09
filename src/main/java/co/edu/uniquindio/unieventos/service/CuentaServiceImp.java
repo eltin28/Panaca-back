@@ -48,7 +48,7 @@ public class CuentaServiceImp {
 
         // Crear entidad Usuario asociada
         Usuario usuario = new Usuario();
-        usuario.setNombreCompleto(cuentaDTO.nombre());
+        usuario.setNombre(cuentaDTO.nombre());
         usuario.setCedula(cuentaDTO.cedula());
         usuario.setTelefono(cuentaDTO.telefono());
         usuario.setDireccion(cuentaDTO.direccion());
@@ -84,7 +84,7 @@ public class CuentaServiceImp {
             throw new CuentaException("Información de usuario no encontrada en la cuenta");
         }
 
-        usuarioExistente.setNombreCompleto(cuentaDTO.nombre());
+        usuarioExistente.setNombre(cuentaDTO.nombre());
         usuarioExistente.setTelefono(cuentaDTO.telefono());
         usuarioExistente.setDireccion(cuentaDTO.direccion());
 
@@ -144,7 +144,7 @@ public class CuentaServiceImp {
 
         return new InformacionCuentaDTO(
                 usuario.getCedula(),
-                usuario.getNombreCompleto(),
+                usuario.getNombre(),
                 usuario.getTelefono(),
                 usuario.getDireccion(),
                 cuentaABuscar.getEmail()
@@ -179,7 +179,7 @@ public class CuentaServiceImp {
         mensaje.setTo(correo);
         mensaje.setSubject("Código de Recuperación de Contraseña");
         mensaje.setText("Utiliza el siguiente código para recuperar tu contraseña: " + codigoRecuperacion);
-        //ailSender.send(mensaje);
+        //mailSender.send(mensaje);
     }
 
 }
