@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.service;
+package co.edu.uniquindio.unieventos.service.service;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.CuentaException;

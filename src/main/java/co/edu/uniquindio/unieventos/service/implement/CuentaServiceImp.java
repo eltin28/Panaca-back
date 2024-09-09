@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.service;
+package co.edu.uniquindio.unieventos.service.implement;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.CrearCuentaDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.EditarCuentaDTO;

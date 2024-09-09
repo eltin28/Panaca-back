@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.service;
+package co.edu.uniquindio.unieventos.service.service;
 
 import org.springframework.stereotype.Service;
 
