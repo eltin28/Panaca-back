@@ -179,7 +179,7 @@ public class CuentaServiceImp {
         mensaje.setTo(correo);
         mensaje.setSubject("Código de Recuperación de Contraseña");
         mensaje.setText("Utiliza el siguiente código para recuperar tu contraseña: " + codigoRecuperacion);
-        //ailSender.send(mensaje);
+        //mailSender.send(mensaje);
     }
 
 }
