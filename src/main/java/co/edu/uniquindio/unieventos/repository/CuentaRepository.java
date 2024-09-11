@@ -12,4 +12,10 @@ public interface CuentaRepository extends MongoRepository<Cuenta, String>{
 
     boolean existsByEmail(String correo);
     Optional<Cuenta> findByEmail(String correo);
+
+    boolean existsByCedula(String cedula);
+    Optional<Cuenta> findByCedula(String cedula);
+
+    boolean existByCodigoValidacionRegistro(String codigo);
+    Optional<Cuenta> findByCodigoValidacionRegistro_Codigo(String codigo);
 }

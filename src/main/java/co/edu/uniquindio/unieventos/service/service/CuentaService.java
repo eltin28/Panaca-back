@@ -4,6 +4,8 @@ import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.CuentaException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface CuentaService {
 
@@ -14,6 +16,8 @@ public interface CuentaService {
     String eliminarCuenta(String id) throws CuentaException;
 
     InformacionCuentaDTO obtenerInformacionCuenta(String id) throws CuentaException;
+
+    List<ItemCuentaDTO> listarCuentas();
 
     String enviarCodigoRecuperacionPassword(String correo) throws CuentaException;
 
