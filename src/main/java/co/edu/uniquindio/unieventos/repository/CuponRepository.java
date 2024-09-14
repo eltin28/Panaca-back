@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CuponRepository extends MongoRepository<Cupon, String> {
+
+    boolean existsByCode(String codigo);
+
 }
