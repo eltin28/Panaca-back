@@ -5,16 +5,29 @@ import co.edu.uniquindio.unieventos.dto.cupon.EditarCuponDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.InformacionCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.CuponException;
 import co.edu.uniquindio.unieventos.model.documents.Cupon;
+import co.edu.uniquindio.unieventos.model.enums.EstadoCupon;
+import co.edu.uniquindio.unieventos.model.enums.TipoCupon;
 import co.edu.uniquindio.unieventos.repository.CuponRepository;
 import co.edu.uniquindio.unieventos.service.service.CuponService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CuponServiceImp implements CuponService{
 
     private final CuponRepository cuponRepository;
+
+    @Autowired private MongoTemplate mongoTemplate;
+
 
     public String crearCupon(CrearCuponDTO cuponDTO) throws CuponException {
         // Verifica si ya existe un cupon con el mismo codigo
@@ -88,10 +101,96 @@ public class CuponServiceImp implements CuponService{
         return new InformacionCuponDTO(
                 cuponABuscar.getNombre(),
                 cuponABuscar.getCodigo(),
-                cuponABuscar.getFechaVencimiento(),
                 cuponABuscar.getDescuento(),
+                cuponABuscar.getFechaApertura(),
+                cuponABuscar.getFechaVencimiento(),
                 cuponABuscar.getTipo(),
                 cuponABuscar.getEstado()
         );
+    }
+
+    public List<Cupon> obtenerCuponesFiltrados(
+        String nombre,
+        LocalDateTime fechaVencimiento,
+        LocalDateTime fechaApertura,
+        Float descuento,
+        TipoCupon tipo,
+        EstadoCupon estado)
+        throws CuponException {
+
+        // Crea un objeto Criteria para construir los filtros
+        Criteria criteria = new Criteria();
+
+        // Filtro por nombre (usando 'like')
+        if (nombre != null && !nombre.isEmpty()) {
+            criteria.and("nombre").regex(nombre, "i"); // 'i' para case-insensitive
+        }
+
+        // Filtro por fecha de vencimiento (mayor o igual a la fecha actual)
+        if (fechaVencimiento != null) {
+            criteria.and("fechaVencimiento").gte(fechaVencimiento);
+        }
+
+        // Filtro por fecha de apertura (mayor o igual a la fecha actual)
+        if (fechaVencimiento != null) {
+            criteria.and("fechaApertura").gte(fechaVencimiento);
+        }
+
+        // Filtro por descuento (exacto)
+        if (descuento != null) {
+            criteria.and("descuento").is(descuento);
+        }
+
+        // Filtro por tipo de cupón (ENUM)
+        if (tipo != null) {
+            criteria.and("tipo").is(tipo);
+        }
+
+        // Filtro por estado del cupón (ENUM)
+        if (estado != null) {
+            criteria.and("estado").is(estado);
+        }
+
+        // Construye la consulta con los filtros
+        Query query = new Query(criteria);
+
+        // Ejecuta la consulta y devuelve la lista de cupones
+        return mongoTemplate.find(query, Cupon.class);
+    }
+
+    public String aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException {
+        // Buscar el cupón por código
+        Optional<Cupon> cuponOpt = cuponRepository.findById(codigoCupon);
+
+        // Verificar si el cupón existe
+        if (cuponOpt.isEmpty()) {
+            return "Cupón no existe.";
+        }
+
+        Cupon cupon = cuponOpt.get();
+
+        // Verificar si el cupón está disponible
+        if (cupon.getEstado() != EstadoCupon.DISPONIBLE) {
+            return "El cupón no está disponible.";
+        }
+
+        // Verificar si el cupón ha expirado
+        if (cupon.getFechaVencimiento().isBefore(fechaCompra)) {
+            return "El cupón ha expirado.";
+        }
+
+        // Verificar si el cupón es único y ya ha sido utilizado
+        if (cupon.getTipo() == TipoCupon.UNICO && cupon.isUtilizado()) {
+            return "El cupón ya ha sido utilizado.";
+        }
+
+        // Si el cupón es único, marcarlo como utilizado y guardar la actualización
+        if (cupon.getTipo() == TipoCupon.UNICO) {
+            cupon.setUtilizado(true);
+            cuponRepository.save(cupon); // Guarda el cupón actualizado
+        }
+
+        // Si todas las validaciones pasan, aplicar el descuento
+        return "Cupón aplicado con éxito. Descuento del " + cupon.getDescuento() + "%.";
     }
 }
