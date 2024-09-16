@@ -32,11 +32,10 @@ public class CuentaServiceImp implements CuentaService {
     /**
      * Metodo para crear una cuenta
      * @param cuentaDTO
-     * @return Mensaje de exito cuando se crea una cuenta
      * @throws CuentaException si la cuenta validada por el email ya existe
      */
     @Override
-    public String crearCuenta(CrearCuentaDTO cuentaDTO) throws CuentaException {
+    public void crearCuenta(CrearCuentaDTO cuentaDTO) throws CuentaException {
         // Verifica si ya existe una cuenta con el mismo email
         if (cuentaRepository.existsByEmail(cuentaDTO.email())) {
             throw new CuentaException("Ya existe una cuenta registrada con este email electrónico.");
@@ -68,7 +67,6 @@ public class CuentaServiceImp implements CuentaService {
 
         //TODO: ENVIAR CORRREOS
 
-        return cuentaCreada.getId();
     }
 
     // Metoodo para generar un código de validación de 4 cifras
@@ -88,6 +86,8 @@ public class CuentaServiceImp implements CuentaService {
     public String editarCuenta(EditarCuentaDTO cuenta) throws CuentaException {
         //Buscamos la cuenta del usuario que se quiere actualizar
         Optional<Cuenta> optionalCuenta = obtenerCuentaPorId(cuenta.id());
+
+        System.out.println( cuenta.id() );
 
         //Si no se encontró la cuenta del usuario, lanzamos una excepción
         if(optionalCuenta.isEmpty()){
@@ -144,19 +144,18 @@ public class CuentaServiceImp implements CuentaService {
      * @throws CuentaException
      */
     @Override
-    public InformacionCuentaDTO obtenerInformacionCuenta(String id)throws CuentaException {
-        //Buscamos la cuenta del usuario que se quiere obtener
+    public InformacionCuentaDTO obtenerInformacionCuenta(String id) throws CuentaException {
+        System.out.println("Buscando cuenta con ID: " + id);
         Optional<Cuenta> optionalCuenta = obtenerCuentaPorId(id);
 
-        //Si no se encontró la cuenta, lanzamos una excepción
-        if(optionalCuenta.isEmpty()){
-            throw new CuentaException("No se encontró el usuario con el id "+id);
+        if (optionalCuenta.isEmpty()) {
+            System.out.println("No se encontró la cuenta con ID: " + id);
+            throw new CuentaException("No se encontró el usuario con el id " + id);
         }
 
-        //Obtenemos la cuenta del usuario
         Cuenta cuenta = optionalCuenta.get();
+        System.out.println("Cuenta encontrada: " + cuenta);
 
-        //Retornamos la información de la cuenta del usuario
         return new InformacionCuentaDTO(
                 cuenta.getId(),
                 cuenta.getUsuario().getCedula(),
@@ -166,6 +165,7 @@ public class CuentaServiceImp implements CuentaService {
                 cuenta.getEmail()
         );
     }
+
 
     @Override
     public List<ItemCuentaDTO> listarCuentas() {
@@ -222,7 +222,7 @@ public class CuentaServiceImp implements CuentaService {
     @Override
     public String cambiarPassword(CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException {
         // Buscar la cuenta que contiene el código de verificación
-        Optional<Cuenta> optionalCuenta = cuentaRepository.findByCodigoValidacionRegistro_Codigo(cambiarPasswordDTO.codigoVerificacion());
+        Optional<Cuenta> optionalCuenta = cuentaRepository.existByCodigoValidacionRegistro(cambiarPasswordDTO.codigoVerificacion());
 
         // Si la cuenta no existe, lanzar excepción
         Cuenta cuenta = optionalCuenta.orElseThrow(() -> new CuentaException("Código de verificación inválido o expirado."));

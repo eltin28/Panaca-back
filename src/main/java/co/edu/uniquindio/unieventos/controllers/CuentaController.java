@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/Cuentas")
+@RequestMapping("/cuentas")
 public class CuentaController {
 
     @Autowired

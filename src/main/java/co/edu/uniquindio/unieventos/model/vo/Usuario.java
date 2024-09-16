@@ -12,10 +12,6 @@ import org.springframework.data.annotation.Id;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Usuario {
 
-    @Id
-    @EqualsAndHashCode.Include
-    private String id;
-
     private String nombre;
     private String cedula;
     private String telefono;

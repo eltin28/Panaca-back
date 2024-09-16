@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public interface CuentaService {
 
-    String crearCuenta(CrearCuentaDTO cuenta) throws CuentaException;
+    void crearCuenta(CrearCuentaDTO cuenta) throws CuentaException;
 
     String editarCuenta(EditarCuentaDTO cuenta) throws CuentaException;
 
