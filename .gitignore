@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+src/main/resources/unievento-90431-firebase-adminsdk-pwxx0-e474dacbc9.json
 
 ### STS ###
 .apt_generated
