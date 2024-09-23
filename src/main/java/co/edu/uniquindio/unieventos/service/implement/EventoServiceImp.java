@@ -53,7 +53,6 @@ public class EventoServiceImp implements EventoService {
     private List<Localidad> crearLocalidades(List<LocalidadDTO> listaLocalidadesDTO) {
         // Inicializar la lista con la capacidad correcta
         List<Localidad> localidades = new ArrayList<>(listaLocalidadesDTO.size());
-
         // Iterar sobre cada LocalidadDTO y crear una nueva Localidad
         for (LocalidadDTO localidadDTO : listaLocalidadesDTO) {
             Localidad localidad = new Localidad(
