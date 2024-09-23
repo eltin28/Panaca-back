@@ -27,7 +27,12 @@ public interface CuponService {
         LocalDateTime fechaApertura,
         Float descuento,
         TipoCupon tipo,
-        EstadoCupon estado) throws CuponException;
+        EstadoCupon estado);
 
     String aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException;
+
+    String fechaAperturaCupon(LocalDateTime fechaApertura) throws CuponException;
+    //Aun falta
+
+
 }
