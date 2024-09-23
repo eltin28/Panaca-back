@@ -1,14 +1,12 @@
-package co.edu.uniquindio.unieventos;
+package co.edu.uniquindio.unieventos.ServiceTest;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.CrearCuentaDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.EditarCuentaDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.InformacionCuentaDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.ItemCuentaDTO;
 import co.edu.uniquindio.unieventos.exceptions.CuentaException;
-import co.edu.uniquindio.unieventos.model.documents.Cuenta;
 import co.edu.uniquindio.unieventos.repository.CuentaRepository;
 import co.edu.uniquindio.unieventos.service.implement.CuentaServiceImp;
-import co.edu.uniquindio.unieventos.service.service.CuentaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class CuentaServicioTest {
+public class CuentaServiceTest {
 
     @Autowired
     private CuentaRepository cuentaRepository;
