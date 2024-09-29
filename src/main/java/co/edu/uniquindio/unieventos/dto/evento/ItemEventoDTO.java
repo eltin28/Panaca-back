@@ -6,6 +6,7 @@ public record ItemEventoDTO(
         String urlImagenPortada,
         String nombre,
         LocalDateTime fecha,
-        String direccion
+        String direccion,
+        String ciudad
 ) {
 }

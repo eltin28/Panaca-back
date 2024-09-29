@@ -4,6 +4,7 @@ import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.exceptions.EventoException;
 import co.edu.uniquindio.unieventos.model.documents.Evento;
 import co.edu.uniquindio.unieventos.model.enums.EstadoEvento;
+import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
 import co.edu.uniquindio.unieventos.model.vo.Localidad;
 import co.edu.uniquindio.unieventos.repository.EventoRepository;
 import co.edu.uniquindio.unieventos.service.service.EventoService;
@@ -11,9 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -199,7 +202,8 @@ public class EventoServiceImp implements EventoService {
                     evento.getImagenPortada(),
                     evento.getNombre(),
                     evento.getFecha(),
-                    evento.getDireccion()
+                    evento.getDireccion(),
+                    evento.getCiudad()
             ));
         }
 
@@ -207,7 +211,51 @@ public class EventoServiceImp implements EventoService {
     }
 
     @Override
-    public List<ItemEventoDTO> filtrarEventos(FiltroEventoDTO filtroEventoDTO) {
-        return List.of();
+    public List<Evento> filtrarPorTipo(TipoEvento tipoEvento) {
+        return eventoRepo.filtrarPorTipo(tipoEvento);
     }
+
+    @Override
+    public List<Evento> filtrarPorFecha(LocalDateTime fecha) {
+        return eventoRepo.filtrarPorFecha(fecha);
+    }
+
+    @Override
+    public List<Evento> filtrarPorCiudad(String ciudad) {
+        return eventoRepo.filtrarPorCiudad(ciudad);
+    }
+
+    @Override
+    public List<Evento> filtrarPorRangoDeFechas(LocalDateTime desde, LocalDateTime hasta) {
+        return eventoRepo.filtrarPorRangoDeFechas(desde, hasta);
+    }
+
+//    @Override
+//    public List<ItemEventoDTO> filtrarEventos(FiltroEventoDTO filtroEventoDTO) {
+//
+//        LocalDateTime fecha = LocalDateTime.now();
+//
+//        // Llamamos al metodo del repositorio
+//        List<Evento> eventos = eventoRepo.filtrarEventosPorTipoCiudadYFecha(
+//                filtroEventoDTO.nombre(),
+//                filtroEventoDTO.tipoEvento(),
+//                filtroEventoDTO.ciudad(),
+//                filtroEventoDTO.fecha()
+//        );
+//
+//        // Convertimos los eventos a DTOs
+//        return eventos.stream()
+//                .map(this::convertirAItemEventoDTO)
+//                .collect(Collectors.toList());
+//    }
+//
+//    private ItemEventoDTO convertirAItemEventoDTO(Evento evento) {
+//        return new ItemEventoDTO(
+//                evento.getImagenPortada(),
+//                evento.getNombre(),
+//                evento.getFecha(),
+//                evento.getDireccion(),
+//                evento.getCiudad()
+//        );
+//    }
 }

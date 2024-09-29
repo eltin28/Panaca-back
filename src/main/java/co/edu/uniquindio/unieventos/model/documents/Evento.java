@@ -34,4 +34,13 @@ public class Evento {
     private List<Localidad> localidades;
     private EstadoEvento estado;
     private TipoEvento tipo;
+
+    public Evento(String id,String nombre,TipoEvento tipo, String ciudad, LocalDateTime fecha){
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.ciudad = ciudad;
+        this.fecha = fecha;
+    }
+
 }
