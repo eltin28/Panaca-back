@@ -5,6 +5,8 @@ import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
 import co.edu.uniquindio.unieventos.model.vo.Localidad;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +24,8 @@ public record CrearEventoDTO(
         @NotEmpty(message = "La dirección del evento es obligatoria.")
         String direccion,
 
-        String imagenesLocalidades,
+        @NotEmpty(message = "La imagen de las localidades es obligatoria.")
+        String imagenLocalidad,
 
         @NotNull(message = "El tipo de evento es obligatorio.")
         TipoEvento tipoEvento,
@@ -31,6 +34,7 @@ public record CrearEventoDTO(
         EstadoEvento estadoEvento,
 
         @NotNull(message = "La fecha del evento es obligatoria.")
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         LocalDateTime fecha,
 
         @NotEmpty(message = "La ciudad es obligatoria.")

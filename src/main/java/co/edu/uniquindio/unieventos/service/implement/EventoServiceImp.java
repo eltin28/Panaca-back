@@ -8,9 +8,11 @@ import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
 import co.edu.uniquindio.unieventos.model.vo.Localidad;
 import co.edu.uniquindio.unieventos.repository.EventoRepository;
 import co.edu.uniquindio.unieventos.service.service.EventoService;
+import co.edu.uniquindio.unieventos.service.service.ImagesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class EventoServiceImp implements EventoService {
 
     private final EventoRepository eventoRepo;
+    private final ImagesService imagesService;
 
     //Metodo para obtener un evento mediante el id
     private Optional<Evento> obtenerEventoPorId(String idEvento) throws EventoException {
@@ -36,27 +39,36 @@ public class EventoServiceImp implements EventoService {
 
     @Override
     public String crearEvento(CrearEventoDTO crearEventoDTO) throws EventoException {
-        // Crear una nueva instancia de Evento
-        Evento nuevoEvento = new Evento();
-        nuevoEvento.setImagenPortada(crearEventoDTO.imagenPortada());
-        nuevoEvento.setNombre(crearEventoDTO.nombre());
-        nuevoEvento.setDescripcion(crearEventoDTO.descripcion());
-        nuevoEvento.setDireccion(crearEventoDTO.direccion());
-        nuevoEvento.setImagenesLocalidades(crearEventoDTO.imagenesLocalidades());
-        nuevoEvento.setTipo(crearEventoDTO.tipoEvento());
-        nuevoEvento.setEstado(crearEventoDTO.estadoEvento());
-        nuevoEvento.setFecha(crearEventoDTO.fecha());
-        nuevoEvento.setCiudad(crearEventoDTO.ciudad());
+        try {
+            Evento nuevoEvento = new Evento();
 
-        // Crear localidades
-        List<Localidad> localidades = crearLocalidades(crearEventoDTO.listaLocalidades());
-        nuevoEvento.setLocalidades(localidades);
+            //String imagenPortadaUrl = imagesService.subirImagen(crearEventoDTO.imagenPortada());
+            //nuevoEvento.setImagenPortada(imagenPortadaUrl);
 
-        // Guardar el nuevo evento en la base de datos
-        Evento eventoGuardado = eventoRepo.save(nuevoEvento);
+            //String imagenLocalidadUrl = imagesService.subirImagen(crearEventoDTO.imagenLocalidad());
+            //nuevoEvento.setImagenLocalidad(imagenLocalidadUrl);
+            nuevoEvento.setImagenPortada(crearEventoDTO.imagenPortada());
+            nuevoEvento.setNombre(crearEventoDTO.nombre());
+            nuevoEvento.setDescripcion(crearEventoDTO.descripcion());
+            nuevoEvento.setDireccion(crearEventoDTO.direccion());
+            nuevoEvento.setImagenLocalidad(crearEventoDTO.imagenLocalidad());
+            nuevoEvento.setTipo(crearEventoDTO.tipoEvento());
+            nuevoEvento.setEstado(crearEventoDTO.estadoEvento());
+            nuevoEvento.setFecha(crearEventoDTO.fecha());
+            nuevoEvento.setCiudad(crearEventoDTO.ciudad());
 
-        // Retornar algún identificador del evento o mensaje de éxito
-        return "Evento creado con éxito. ID: " + eventoGuardado.getId();
+            // Crear localidades
+            List<Localidad> localidades = crearLocalidades(crearEventoDTO.listaLocalidades());
+            nuevoEvento.setLocalidades(localidades);
+
+            // Guardar el nuevo evento en la base de datos
+            Evento eventoGuardado = eventoRepo.save(nuevoEvento);
+
+            // Retornar algún identificador del evento o mensaje de éxito
+            return "Evento creado con éxito. ID: " + eventoGuardado.getId();
+        }catch (Exception e) {
+            throw new EventoException("Error al crear el evento: " + e.getMessage());
+        }
     }
 
     /**
@@ -67,17 +79,15 @@ public class EventoServiceImp implements EventoService {
      */
     @Override
     public List<Localidad> crearLocalidades(List<LocalidadDTO> listaLocalidadesDTO) {
-        // Inicializar la lista con la capacidad correcta
         List<Localidad> localidades = new ArrayList<>(listaLocalidadesDTO.size());
-        // Iterar sobre cada LocalidadDTO y crear una nueva Localidad
         for (LocalidadDTO localidadDTO : listaLocalidadesDTO) {
-            Localidad localidad = new Localidad(
-                    localidadDTO.nombre(),
-                    localidadDTO.capacidadMaxima(),
-                    localidadDTO.precio()
-            );
-            // Agregar la localidad a la lista
-            localidades.add(localidad);
+                // Crear una nueva Localidad con la URL de la imagen
+                Localidad localidad = new Localidad(
+                        localidadDTO.nombre(),
+                        localidadDTO.capacidadMaxima(),
+                        localidadDTO.precio()
+                );
+                localidades.add(localidad);
         }
         return localidades;
     }
@@ -103,7 +113,7 @@ public class EventoServiceImp implements EventoService {
         eventoModificado.setNombre(editarEventoDTO.nombre());
         eventoModificado.setDescripcion(editarEventoDTO.descripcion());
         eventoModificado.setDireccion(editarEventoDTO.direccion());
-        eventoModificado.setImagenesLocalidades(editarEventoDTO.imagenesLocalidades());
+        eventoModificado.setImagenLocalidad(editarEventoDTO.imagenesLocalidades());
         eventoModificado.setTipo(editarEventoDTO.tipoEvento());
         eventoModificado.setEstado(editarEventoDTO.estadoEvento());
         eventoModificado.setFecha(editarEventoDTO.fecha());
@@ -181,7 +191,7 @@ public class EventoServiceImp implements EventoService {
                 evento.getNombre(),
                 evento.getDescripcion(),
                 evento.getDireccion(),
-                evento.getImagenesLocalidades(),
+                evento.getImagenLocalidad(),
                 evento.getTipo(),
                 evento.getEstado(),
                 evento.getFecha(),
@@ -212,22 +222,38 @@ public class EventoServiceImp implements EventoService {
 
     @Override
     public List<Evento> filtrarPorTipo(TipoEvento tipoEvento) {
-        return eventoRepo.filtrarPorTipo(tipoEvento);
+        List<Evento> eventos = eventoRepo.filtrarPorTipo(tipoEvento);
+        if (eventos.isEmpty()) {
+            throw new EventoException("No se encontraron eventos para el tipo de evento: " + tipoEvento);
+        }
+        return eventos;
     }
 
     @Override
     public List<Evento> filtrarPorFecha(LocalDateTime fecha) {
-        return eventoRepo.filtrarPorFecha(fecha);
+        List<Evento> eventos = eventoRepo.filtrarPorFecha(fecha);
+        if (eventos.isEmpty()) {
+            throw new EventoException("No se encontraron eventos para la fecha: " + fecha);
+        }
+        return eventos;
     }
 
     @Override
     public List<Evento> filtrarPorCiudad(String ciudad) {
-        return eventoRepo.filtrarPorCiudad(ciudad);
+        List<Evento> eventos = eventoRepo.filtrarPorCiudad(ciudad);
+        if (eventos.isEmpty()) {
+            throw new EventoException("No se encontraron eventos para la ciudad: " + ciudad);
+        }
+        return eventos;
     }
 
     @Override
     public List<Evento> filtrarPorRangoDeFechas(LocalDateTime desde, LocalDateTime hasta) {
-        return eventoRepo.filtrarPorRangoDeFechas(desde, hasta);
+        List<Evento> eventos = eventoRepo.filtrarPorRangoDeFechas(desde, hasta);
+        if (eventos.isEmpty()) {
+            throw new EventoException("No se encontraron eventos en el rango de fechas: " + desde + " a " + hasta);
+        }
+        return eventos;
     }
 
 //    @Override

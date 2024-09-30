@@ -74,16 +74,4 @@ public class CuentaServiceTest {
         assertDoesNotThrow(() -> cuentaService.eliminarCuenta(idCuenta));
 
     }
-
-    @Test
-    public void listarTest(){
-        //Se obtiene la lista de las cuentas de los usuarios
-        List<ItemCuentaDTO> lista = cuentaService.listarCuentas();
-
-
-        //Se verifica que la lista no sea nula y que tenga 3 elementos (o los que hayan)
-        assertEquals(5, lista.size());
-    }
-
-
 }

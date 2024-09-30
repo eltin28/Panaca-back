@@ -29,7 +29,7 @@ public class Evento {
     private String direccion;
     private String ciudad;
     private LocalDateTime fecha;
-    private String imagenesLocalidades;
+    private String imagenLocalidad;
     private String imagenPortada;
     private List<Localidad> localidades;
     private EstadoEvento estado;

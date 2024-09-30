@@ -28,12 +28,12 @@ public class JWTUtils {
                 .compact();
     }
 
-    public Jws<Claims> parseJwt(String jwtString) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, IllegalArgumentException {
+    public static Jws<Claims> parseJwt(String jwtString) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, IllegalArgumentException {
         JwtParser jwtParser = Jwts.parser().verifyWith( getKey() ).build();
         return jwtParser.parseSignedClaims(jwtString);
     }
 
-    private SecretKey getKey(){
+    private static SecretKey getKey(){
         String claveSecreta = "secretsecretsecretsecretsecretsecretsecretsecret";
         byte[] secretKeyBytes = claveSecreta.getBytes();
         return Keys.hmacShaKeyFor(secretKeyBytes);

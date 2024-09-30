@@ -14,19 +14,13 @@ public interface CuentaService {
 
     void crearCuenta(CrearCuentaDTO cuenta) throws CuentaException;
 
-    void validarCodigo(String email, String codigo) throws CuentaException;
-
-    String generarCodigoValidacion();
-
-    String encriptarPassword(String password);
+    void validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException;
 
     String editarCuenta(EditarCuentaDTO cuenta) throws CuentaException;
 
     String eliminarCuenta(String id) throws CuentaException;
 
     InformacionCuentaDTO obtenerInformacionCuenta(String id) throws CuentaException;
-
-    List<ItemCuentaDTO> listarCuentas();
 
     String enviarCodigoRecuperacionPassword(String correo) throws CuentaException;
 

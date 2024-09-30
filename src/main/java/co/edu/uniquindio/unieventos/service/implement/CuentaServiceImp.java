@@ -65,6 +65,8 @@ public class CuentaServiceImp implements CuentaService {
         ));
         nuevaCuenta.setEstado(EstadoCuenta.INACTIVO);
 
+        String encrptar = encriptarPassword(cuentaDTO.password());
+
         // Generar y asignar el código de validación
         String codigoValidacion = generarCodigoValidacion();
         nuevaCuenta.setCodigoVerificacionRegistro(String.valueOf(new CodigoValidacion(LocalDateTime.now(), codigoValidacion)));
@@ -86,11 +88,11 @@ public class CuentaServiceImp implements CuentaService {
      * @throws CuentaException
      */
     @Override
-    public void validarCodigo(String email, String codigo) throws CuentaException {
-        Cuenta cuenta = cuentaRepository.findByEmail(email)
+    public void validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException {
+        Cuenta cuenta = cuentaRepository.findByEmail(validarCodigoDTO.email())
                 .orElseThrow(() -> new CuentaException("No se encontró la cuenta."));
 
-        if (cuenta.getCodigoVerificacionRegistro().equals(codigo)) {
+        if (cuenta.getCodigoVerificacionRegistro().equals(validarCodigoDTO.codigo())) {
             cuenta.setEstado(EstadoCuenta.ACTIVO);
             cuentaRepository.save(cuenta);
         } else {
@@ -98,18 +100,15 @@ public class CuentaServiceImp implements CuentaService {
         }
     }
 
-
     // Metoodo para generar un código de validación de 4 cifras
-    @Override
-    public String generarCodigoValidacion() {
+    private String generarCodigoValidacion() {
         Random random = new Random();
         int code = random.nextInt(9000) + 1000;
         return String.valueOf(code);
     }
 
     //Metodo para encriptar la contraseña
-    @Override
-    public String encriptarPassword(String password){
+    private String encriptarPassword(String password){
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return passwordEncoder.encode( password );
     }
@@ -201,29 +200,6 @@ public class CuentaServiceImp implements CuentaService {
                 cuenta.getEmail()
         );
     }
-
-
-    @Override
-    public List<ItemCuentaDTO> listarCuentas() {
-
-        //Obtenemos todas las cuentas de los usuarios de la base de datos
-        List<Cuenta> cuentas = cuentaRepository.findAll();
-
-        //Creamos una lista de DTOs
-        List<ItemCuentaDTO> items = new ArrayList<>();
-
-        //Recorremos la lista de cuentas y por cada uno creamos un DTO y lo agregamos a la lista
-        for (Cuenta cuenta : cuentas) {
-            items.add( new ItemCuentaDTO(
-                    cuenta.getId(),
-                    cuenta.getUsuario().getNombre(),
-                    cuenta.getEmail(),
-                    cuenta.getUsuario().getTelefono()
-            ));
-        }
-        return items;
-    }
-
 
     /**
      * Metodo para enviar los codigos de recuperacion para un contraseña
