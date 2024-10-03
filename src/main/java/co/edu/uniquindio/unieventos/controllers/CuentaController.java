@@ -2,6 +2,7 @@ package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.dto.autenticacion.MensajeDTO;
+import co.edu.uniquindio.unieventos.exceptions.CuentaException;
 import co.edu.uniquindio.unieventos.model.documents.Cuenta;
 import co.edu.uniquindio.unieventos.model.vo.Usuario;
 import co.edu.uniquindio.unieventos.repository.CuentaRepository;
@@ -30,52 +31,72 @@ public class CuentaController {
     private final CuentaService cuentaService;
 
     @PostMapping("/crear-cuenta")
-    public ResponseEntity<MensajeDTO<String>> crearCuenta(@Valid @RequestBody CrearCuentaDTO cuentaDTO) throws Exception {
+    public ResponseEntity<MensajeDTO<String>> crearCuenta(@Valid @RequestBody CrearCuentaDTO cuentaDTO) throws CuentaException {
         try {
             cuentaService.crearCuenta(cuentaDTO);
             return ResponseEntity.ok(new MensajeDTO<>(true, "Cuenta creada correctamente"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, "Error al crear la cuenta"));
+        } catch (CuentaException e) {
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
 
     @PutMapping("/editar-perfil")
-    public ResponseEntity<MensajeDTO<String>> editarCuenta(@Valid @RequestBody EditarCuentaDTO cuenta) throws Exception{
-        cuentaService.editarCuenta(cuenta);
-        return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta editada exitosamente"));
+    public ResponseEntity<MensajeDTO<String>> editarCuenta(@Valid @RequestBody EditarCuentaDTO cuenta) throws CuentaException{
+        try {
+            cuentaService.editarCuenta(cuenta);
+            return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta editada exitosamente"));
+        }catch (CuentaException e){
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
+        }
     }
 
-//    @GetMapping("/validar-codigo")
-//    public ResponseEntity<MensajeDTO<ValidarCodigoDTO>> validarCodigo(@Valid @RequestBody ValidarCodigoDTO validarCodigoDTO)throws Exception {
-//        ValidarCodigoDTO validar = cuentaService.validarCodigo(validarCodigoDTO);
-//        return ResponseEntity.ok(new MensajeDTO<>(true, validar));
-//    }
+    @GetMapping("/validar-codigo")
+    public ResponseEntity<MensajeDTO<String>> validarCodigo(@Valid @RequestBody ValidarCodigoDTO validarCodigoDTO)throws CuentaException {
+        try {
+            cuentaService.validarCodigo(validarCodigoDTO);
+            return ResponseEntity.ok(new MensajeDTO<>(true, "Cuenta activada con exito"));
+        }catch (CuentaException e){
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
+        }
+    }
 
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<MensajeDTO<String>> eliminarCuenta(@PathVariable String id) throws Exception {
-        cuentaService.eliminarCuenta(id);
-        return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta eliminada exitosamente"));
+    public ResponseEntity<MensajeDTO<String>> eliminarCuenta(@PathVariable String id) throws CuentaException {
+        try {
+            cuentaService.eliminarCuenta(id);
+            return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta eliminada exitosamente"));
+        }catch (CuentaException e){
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
+        }
     }
 
     @GetMapping("/obtener/{id}")
-    public ResponseEntity<MensajeDTO<InformacionCuentaDTO>> obtenerInformacionCuenta(@PathVariable String id) throws Exception{
+    public ResponseEntity<MensajeDTO<InformacionCuentaDTO>> obtenerInformacionCuenta(@PathVariable String id) throws CuentaException{
         InformacionCuentaDTO info = cuentaService.obtenerInformacionCuenta(id);
         return ResponseEntity.ok(new MensajeDTO<>(false, info));
     }
 
-    @PostMapping("/enviar-codigo-recuperacion-contaseña")
-    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacion(@Valid @RequestBody String correo) throws Exception{
-        String enviarCodigoRecuperacion = cuentaService.enviarCodigoRecuperacionPassword(correo);
-        return ResponseEntity.ok(new MensajeDTO<>(false, enviarCodigoRecuperacion));
+    @PostMapping("/enviar-codigo-recuperacion-contasenia")
+    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacion(@Valid @RequestBody CodigoContraseniaDTO codigoContraseniaDTO) throws CuentaException{
+        try {
+            cuentaService.enviarCodigoRecuperacionPassword(codigoContraseniaDTO);
+            return ResponseEntity.ok(new MensajeDTO<>(false, "Codigo enviado con a su emial correctamente"));
+        }catch (CuentaException e){
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, "Error al enviar el correo"));
+        }
     }
 
     @PutMapping("/cambiar-password")
-    public ResponseEntity<MensajeDTO<String>> cambiarPassword(@Valid @RequestBody CambiarPasswordDTO cambiarPasswordDTO) throws Exception{
-        String cambiarPassword = cuentaService.cambiarPassword(cambiarPasswordDTO);
-        return ResponseEntity.ok(new MensajeDTO<>(false, cambiarPassword));
+    public ResponseEntity<MensajeDTO<String>> cambiarPassword(@Valid @RequestBody CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException{
+        try {
+            cuentaService.cambiarPassword(cambiarPasswordDTO);
+            return ResponseEntity.ok(new MensajeDTO<>(false, "Contraseña modificada con exito"));
+        }catch (CuentaException e){
+            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
+        }
     }
-
-
 
     /**
      * Metodo para agregar un usuario a la base de datos

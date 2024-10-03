@@ -6,7 +6,6 @@ import co.edu.uniquindio.unieventos.exceptions.CuentaException;
 import co.edu.uniquindio.unieventos.model.documents.Cuenta;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -14,17 +13,17 @@ public interface CuentaService {
 
     void crearCuenta(CrearCuentaDTO cuenta) throws CuentaException;
 
-    void validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException;
+    ValidarCodigoDTO validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException;
 
-    String editarCuenta(EditarCuentaDTO cuenta) throws CuentaException;
+    void editarCuenta(EditarCuentaDTO cuenta) throws CuentaException;
 
-    String eliminarCuenta(String id) throws CuentaException;
+    void eliminarCuenta(String id) throws CuentaException;
 
     InformacionCuentaDTO obtenerInformacionCuenta(String id) throws CuentaException;
 
-    String enviarCodigoRecuperacionPassword(String correo) throws CuentaException;
+    void enviarCodigoRecuperacionPassword(CodigoContraseniaDTO codigoContraseniaDTO) throws CuentaException;
 
-    String cambiarPassword(CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException;
+    void cambiarPassword(CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException;
 
     TokenDTO iniciarSesion(LoginDTO loginDTO) throws CuentaException;
 

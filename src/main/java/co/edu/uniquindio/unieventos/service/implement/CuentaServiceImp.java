@@ -66,10 +66,11 @@ public class CuentaServiceImp implements CuentaService {
         nuevaCuenta.setEstado(EstadoCuenta.INACTIVO);
 
         String encrptar = encriptarPassword(cuentaDTO.password());
+        nuevaCuenta.setPassword(encrptar);
 
         // Generar y asignar el código de validación
         String codigoValidacion = generarCodigoValidacion();
-        nuevaCuenta.setCodigoVerificacionRegistro(String.valueOf(new CodigoValidacion(LocalDateTime.now(), codigoValidacion)));
+        nuevaCuenta.setCodigoVerificacionRegistro(codigoValidacion);
 
         // Guardar la cuenta en la base de datos
         Cuenta cuentaCreada = cuentaRepository.save(nuevaCuenta);
@@ -83,21 +84,28 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para validar que el codigo de el usuario sea el enviado a el correo
+     *
      * @param email
      * @param codigo
+     * @return
      * @throws CuentaException
      */
     @Override
-    public void validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException {
+    public ValidarCodigoDTO validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException {
+        // Buscar la cuenta por email
         Cuenta cuenta = cuentaRepository.findByEmail(validarCodigoDTO.email())
                 .orElseThrow(() -> new CuentaException("No se encontró la cuenta."));
 
-        if (cuenta.getCodigoVerificacionRegistro().equals(validarCodigoDTO.codigo())) {
-            cuenta.setEstado(EstadoCuenta.ACTIVO);
-            cuentaRepository.save(cuenta);
-        } else {
-            throw new CuentaException("Código de validación incorrecto.");
+        // Comparar el código enviado con el código almacenado
+        if (!cuenta.getCodigoVerificacionRegistro().equals(validarCodigoDTO.codigo())) {
+            throw new CuentaException("El código de verificación es incorrecto.");
         }
+
+        // Si el código es correcto, activar la cuenta
+        cuenta.setEstado(EstadoCuenta.ACTIVO);
+        cuentaRepository.save(cuenta);
+
+        return validarCodigoDTO;
     }
 
     // Metoodo para generar un código de validación de 4 cifras
@@ -120,9 +128,9 @@ public class CuentaServiceImp implements CuentaService {
      * @throws CuentaException
      */
     @Override
-    public String editarCuenta(EditarCuentaDTO cuenta) throws CuentaException {
+    public void editarCuenta(EditarCuentaDTO cuentaEditada) throws CuentaException {
         //Buscamos la cuenta del usuario que se quiere actualizar
-        Optional<Cuenta> optionalCuenta = obtenerCuentaPorId(cuenta.id());
+        Optional<Cuenta> optionalCuenta = obtenerCuentaPorId(cuentaEditada.id());
 
         //Si no se encontró la cuenta del usuario, lanzamos una excepción
         if(optionalCuenta.isEmpty()){
@@ -131,20 +139,20 @@ public class CuentaServiceImp implements CuentaService {
 
         //Obtenemos la cuenta del usuario a modificar y actualizamos sus datos
         Cuenta cuentaModificada = optionalCuenta.get();
-        cuentaModificada.getUsuario().setNombre( cuenta.nombre() );
-        cuentaModificada.getUsuario().setTelefono( cuenta.telefono() );
-        cuentaModificada.getUsuario().setDireccion( cuenta.direccion() );
+        cuentaModificada.getUsuario().setNombre( cuentaEditada.nombre() );
+        cuentaModificada.getUsuario().setTelefono( cuentaEditada.telefono() );
+        cuentaModificada.getUsuario().setDireccion( cuentaEditada.direccion() );
         // Actualizar la contraseña si se proporciona
-        if (cuenta.password() != null && !cuenta.password().isEmpty()) {
-            String nuevaPassword = cuenta.password();
-            cuentaModificada.setPassword( cuenta.password() );
+        if (cuentaEditada.password() != null && !cuentaEditada.password().isEmpty()) {
+            String nuevaPassword = cuentaEditada.password();
+            cuentaModificada.setPassword( cuentaEditada.password() );
+            String encrptar = encriptarPassword(cuentaEditada.password());
+            cuentaModificada.setPassword(encrptar);
         }
 
         //Como el objeto cuenta ya tiene un id, el save() no crea un nuevo registro sino que actualiza el que ya existe
         cuentaRepository.save(cuentaModificada);
-        return cuentaModificada.getId();
     }
-
 
     /**
      * Metodo para eliminar una cuenta por su ID
@@ -153,7 +161,7 @@ public class CuentaServiceImp implements CuentaService {
      * @throws CuentaException
      */
     @Override
-    public String eliminarCuenta(String id) throws CuentaException {
+    public void eliminarCuenta(String id) throws CuentaException {
         //Buscamos la cuenta del usuario que se quiere eliminar
         Optional<Cuenta> optionalCuenta = obtenerCuentaPorId(id);
 
@@ -167,9 +175,6 @@ public class CuentaServiceImp implements CuentaService {
         cuenta.setEstado(EstadoCuenta.ELIMINADO);
 
         cuentaRepository.save(cuenta);
-
-        return cuenta.getId();
-
     }
 
     /**
@@ -208,14 +213,10 @@ public class CuentaServiceImp implements CuentaService {
      * @throws CuentaException
      */
     @Override
-    public String enviarCodigoRecuperacionPassword(String correo) throws CuentaException {
-        // Validar que el email no sea nulo o vacío
-        if (correo == null || correo.isEmpty()) {
-            throw new CuentaException("El email no puede ser nulo o vacío");
-        }
+    public void enviarCodigoRecuperacionPassword(CodigoContraseniaDTO codigoContrasenieDTO) throws CuentaException {
 
         // Buscar la cuenta en la base de datos usando el email proporcionado
-        Cuenta cuentaExistente = cuentaRepository.findByEmail(correo)
+        Cuenta cuentaExistente = cuentaRepository.findByEmail(codigoContrasenieDTO.email())
                 .orElseThrow(() -> new CuentaException("Cuenta no encontrada para el email proporcionado"));
 
         // Generar un código de recuperación único
@@ -225,16 +226,17 @@ public class CuentaServiceImp implements CuentaService {
         cuentaExistente.setCodigoVerificacionContrasenia(codigoRecuperacion);
         cuentaRepository.save(cuentaExistente);
 
-        // Enviar el código por email electrónico
-        //enviarCorreoRecuperacion(email, codigoRecuperacion);
-
-        return "Código de recuperación enviado con éxito";
+        // Enviar el código de validación al correo
+        String asunto = "Código de recuperación";
+        String cuerpo = "El código para recuperar tu contraseña es: " + codigoRecuperacion;
+        EmailDTO emailDTO = new EmailDTO(asunto, cuerpo, codigoContrasenieDTO.email());
+        emailService.enviarCorreo(emailDTO);
     }
 
     @Override
-    public String cambiarPassword(CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException {
+    public void cambiarPassword(CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException {
         // Buscar la cuenta que contiene el código de verificación
-        Optional<Cuenta> optionalCuenta = cuentaRepository.existByCodigoValidacionRegistro(cambiarPasswordDTO.codigoVerificacion());
+        Optional<Cuenta> optionalCuenta = cuentaRepository.existBycodigoVerificacionContrasenia(cambiarPasswordDTO.codigoVerificacion());
 
         // Si la cuenta no existe, lanzar excepción
         Cuenta cuenta = optionalCuenta.orElseThrow(() -> new CuentaException("Código de verificación inválido o expirado."));
@@ -246,14 +248,14 @@ public class CuentaServiceImp implements CuentaService {
 
         // Actualizar la contraseña con la nueva contraseña proporcionada
         cuenta.setPassword(cambiarPasswordDTO.passwordNueva());
+        String encrptar = encriptarPassword(cambiarPasswordDTO.passwordNueva());
+        cuenta.setPassword(encrptar);
 
         // Limpiar el código de verificación después de cambiar la contraseña
         cuenta.setCodigoVerificacionContrasenia(null);
 
         // Guardar los cambios en la base de datos
         cuentaRepository.save(cuenta);
-
-        return "Contraseña cambiada con éxito.";
     }
 
     @Override

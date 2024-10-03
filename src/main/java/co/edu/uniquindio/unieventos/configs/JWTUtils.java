@@ -13,7 +13,6 @@ import java.util.Map;
 @Component
 public class JWTUtils {
 
-
     public String generarToken(String email, Map<String, Object> claims){
 
         Instant now = Instant.now();
@@ -34,7 +33,7 @@ public class JWTUtils {
     }
 
     private static SecretKey getKey(){
-        String claveSecreta = "secretsecretsecretsecretsecretsecretsecretsecret";
+        String claveSecreta = "k8A9sFh3Jz7pQ4T1xVbWmR6LkNvU2gC5Yt0qXsEj8PdGhZw1l9Bn3yM2fX0rJkH7";
         byte[] secretKeyBytes = claveSecreta.getBytes();
         return Keys.hmacShaKeyFor(secretKeyBytes);
     }

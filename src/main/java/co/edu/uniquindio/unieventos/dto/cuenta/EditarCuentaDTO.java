@@ -17,6 +17,7 @@ public record EditarCuentaDTO(
         @Length(min= 10, max = 10, message = "El teléfono debe tener un máximo de 10 caracteres")
         String telefono,
 
+        @NotBlank(message = "La dirreccion es requerida")
         @Length(max = 100, message = "La dirección debe tener un máximo de 100 caracteres")
         String direccion,
 
