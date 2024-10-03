@@ -12,13 +12,11 @@ import co.edu.uniquindio.unieventos.service.service.ImagesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -38,20 +36,14 @@ public class EventoServiceImp implements EventoService {
     }
 
     @Override
-    public String crearEvento(CrearEventoDTO crearEventoDTO) throws EventoException {
-        try {
+    public void crearEvento(CrearEventoDTO crearEventoDTO) throws EventoException {
+
             Evento nuevoEvento = new Evento();
-
-            //String imagenPortadaUrl = imagesService.subirImagen(crearEventoDTO.imagenPortada());
-            //nuevoEvento.setImagenPortada(imagenPortadaUrl);
-
-            //String imagenLocalidadUrl = imagesService.subirImagen(crearEventoDTO.imagenLocalidad());
-            //nuevoEvento.setImagenLocalidad(imagenLocalidadUrl);
             nuevoEvento.setImagenPortada(crearEventoDTO.imagenPortada());
+            nuevoEvento.setImagenLocalidad(crearEventoDTO.imagenLocalidad());
             nuevoEvento.setNombre(crearEventoDTO.nombre());
             nuevoEvento.setDescripcion(crearEventoDTO.descripcion());
             nuevoEvento.setDireccion(crearEventoDTO.direccion());
-            nuevoEvento.setImagenLocalidad(crearEventoDTO.imagenLocalidad());
             nuevoEvento.setTipo(crearEventoDTO.tipoEvento());
             nuevoEvento.setEstado(crearEventoDTO.estadoEvento());
             nuevoEvento.setFecha(crearEventoDTO.fecha());
@@ -62,30 +54,22 @@ public class EventoServiceImp implements EventoService {
             nuevoEvento.setLocalidades(localidades);
 
             // Guardar el nuevo evento en la base de datos
-            Evento eventoGuardado = eventoRepo.save(nuevoEvento);
-
-            // Retornar algún identificador del evento o mensaje de éxito
-            return "Evento creado con éxito. ID: " + eventoGuardado.getId();
-        }catch (Exception e) {
-            throw new EventoException("Error al crear el evento: " + e.getMessage());
-        }
+            eventoRepo.save(nuevoEvento);
     }
 
     /**
      * Metodo para crear localidades
-     *
      * @param listaLocalidadesDTO
      * @return lista de localidades
      */
-    @Override
-    public List<Localidad> crearLocalidades(List<LocalidadDTO> listaLocalidadesDTO) {
+    private List<Localidad> crearLocalidades(List<CrearLocalidadDTO> listaLocalidadesDTO) {
         List<Localidad> localidades = new ArrayList<>(listaLocalidadesDTO.size());
-        for (LocalidadDTO localidadDTO : listaLocalidadesDTO) {
+        for (CrearLocalidadDTO crearLocalidadDTO : listaLocalidadesDTO) {
                 // Crear una nueva Localidad con la URL de la imagen
                 Localidad localidad = new Localidad(
-                        localidadDTO.nombre(),
-                        localidadDTO.capacidadMaxima(),
-                        localidadDTO.precio()
+                        crearLocalidadDTO.nombre(),
+                        crearLocalidadDTO.capacidadMaxima(),
+                        crearLocalidadDTO.precio()
                 );
                 localidades.add(localidad);
         }
@@ -100,12 +84,12 @@ public class EventoServiceImp implements EventoService {
      * @throws EventoException
      */
     @Override
-    public String editarEvento(EditarEventoDTO editarEventoDTO) throws EventoException {
+    public void editarEvento(EditarEventoDTO editarEventoDTO) throws EventoException {
 
         Optional<Evento> optionalEvento = obtenerEventoPorId(editarEventoDTO.id());
 
         if (optionalEvento.isEmpty()) {
-            throw new EventoException("No existe un evento con el id dado");
+            throw new EventoException("No existe este evento");
         }
 
         Evento eventoModificado = optionalEvento.get();
@@ -113,7 +97,7 @@ public class EventoServiceImp implements EventoService {
         eventoModificado.setNombre(editarEventoDTO.nombre());
         eventoModificado.setDescripcion(editarEventoDTO.descripcion());
         eventoModificado.setDireccion(editarEventoDTO.direccion());
-        eventoModificado.setImagenLocalidad(editarEventoDTO.imagenesLocalidades());
+        eventoModificado.setImagenLocalidad(editarEventoDTO.imagenLocalidad());
         eventoModificado.setTipo(editarEventoDTO.tipoEvento());
         eventoModificado.setEstado(editarEventoDTO.estadoEvento());
         eventoModificado.setFecha(editarEventoDTO.fecha());
@@ -123,7 +107,6 @@ public class EventoServiceImp implements EventoService {
         eventoModificado.setLocalidades(localidadesActualizadas);
 
         eventoRepo.save(eventoModificado);
-        return eventoModificado.getId();
     }
 
     /**
@@ -132,18 +115,17 @@ public class EventoServiceImp implements EventoService {
      * @param listaLocalidadesDTO
      * @return lista de localidades modificadas
      */
-    @Override
-    public List<Localidad> modificarLocalidades(List<Localidad> localidadesActuales ,List<LocalidadDTO> listaLocalidadesDTO) throws EventoException {
+    private List<Localidad> modificarLocalidades(List<Localidad> localidadesActuales ,List<CrearLocalidadDTO> listaLocalidadesDTO) throws EventoException {
 
         List<Localidad> localidadesActualizadas = new ArrayList<>(localidadesActuales);
 
        if(!localidadesActuales.isEmpty()) {
-           for (LocalidadDTO localidadDTO : listaLocalidadesDTO) {
+           for (CrearLocalidadDTO crearLocalidadDTO : listaLocalidadesDTO) {
                for (Localidad localidad : localidadesActuales) {
-                   if (localidad.getNombre().equals(localidadDTO.nombre())) {
-                       localidad.setNombre(localidadDTO.nombre());
-                       localidad.setCapacidadMaxima(localidadDTO.capacidadMaxima());
-                       localidad.setPrecio(localidadDTO.precio());
+                   if (localidad.getNombre().equals(crearLocalidadDTO.nombre())) {
+                       localidad.setNombre(crearLocalidadDTO.nombre());
+                       localidad.setCapacidadMaxima(crearLocalidadDTO.capacidadMaxima());
+                       localidad.setPrecio(crearLocalidadDTO.precio());
                    }
                }
            }
@@ -160,19 +142,18 @@ public class EventoServiceImp implements EventoService {
      * @throws EventoException
      */
     @Override
-    public String eliminarEvento(String id) throws EventoException {
+    public void eliminarEvento(String id) throws EventoException {
 
         Optional<Evento> optionalEvento = obtenerEventoPorId(id);
 
         if(optionalEvento.isEmpty()){
-            throw new EventoException("No se encontro el evento con el id: " +id);
+            throw new EventoException("No se encontro el evento");
         }
 
         Evento evento = optionalEvento.get();
         evento.setEstado(EstadoEvento.ELIMINADO);
 
         eventoRepo.save(evento);
-        return evento.getId();
     }
 
     @Override
@@ -211,49 +192,111 @@ public class EventoServiceImp implements EventoService {
             itemEventoDTO.add(new ItemEventoDTO(
                     evento.getImagenPortada(),
                     evento.getNombre(),
+                    evento.getTipo(),
                     evento.getFecha(),
                     evento.getDireccion(),
                     evento.getCiudad()
             ));
         }
-
         return itemEventoDTO;
     }
 
     @Override
-    public List<Evento> filtrarPorTipo(TipoEvento tipoEvento) {
-        List<Evento> eventos = eventoRepo.filtrarPorTipo(tipoEvento);
+    public List<EventoFiltradoDTO> filtrarPorTipo(TipoEvento tipoEvento) {
+        List<Evento> eventos = eventoRepo.filtrarPorTipo(tipoEvento.name());
+
         if (eventos.isEmpty()) {
             throw new EventoException("No se encontraron eventos para el tipo de evento: " + tipoEvento);
         }
-        return eventos;
+
+        List<EventoFiltradoDTO> eventoFiltradoDTO = new ArrayList<>();
+
+        for(Evento evento : eventos){
+            eventoFiltradoDTO.add(new EventoFiltradoDTO(
+                    evento.getImagenPortada(),
+                    evento.getNombre(),
+                    evento.getDireccion(),
+                    evento.getCiudad(),
+                    evento.getFecha(),
+                    evento.getTipo(),
+                    evento.getLocalidades()
+            ));
+        }
+
+
+        return eventoFiltradoDTO;
     }
 
     @Override
-    public List<Evento> filtrarPorFecha(LocalDateTime fecha) {
+    public List<EventoFiltradoDTO> filtrarPorFecha(LocalDateTime fecha) {
         List<Evento> eventos = eventoRepo.filtrarPorFecha(fecha);
         if (eventos.isEmpty()) {
             throw new EventoException("No se encontraron eventos para la fecha: " + fecha);
         }
-        return eventos;
+
+        List<EventoFiltradoDTO> eventoFiltradoDTO = new ArrayList<>();
+
+        for(Evento evento : eventos){
+            eventoFiltradoDTO.add(new EventoFiltradoDTO(
+                    evento.getImagenPortada(),
+                    evento.getNombre(),
+                    evento.getDireccion(),
+                    evento.getCiudad(),
+                    evento.getFecha(),
+                    evento.getTipo(),
+                    evento.getLocalidades()
+            ));
+        }
+
+        return eventoFiltradoDTO;
     }
 
     @Override
-    public List<Evento> filtrarPorCiudad(String ciudad) {
+    public List<EventoFiltradoDTO> filtrarPorCiudad(String ciudad) {
         List<Evento> eventos = eventoRepo.filtrarPorCiudad(ciudad);
         if (eventos.isEmpty()) {
             throw new EventoException("No se encontraron eventos para la ciudad: " + ciudad);
         }
-        return eventos;
+
+        List<EventoFiltradoDTO> eventoFiltradoDTO = new ArrayList<>();
+
+        for(Evento evento : eventos){
+            eventoFiltradoDTO.add(new EventoFiltradoDTO(
+                    evento.getImagenPortada(),
+                    evento.getNombre(),
+                    evento.getDireccion(),
+                    evento.getCiudad(),
+                    evento.getFecha(),
+                    evento.getTipo(),
+                    evento.getLocalidades()
+            ));
+        }
+
+        return eventoFiltradoDTO;
     }
 
     @Override
-    public List<Evento> filtrarPorRangoDeFechas(LocalDateTime desde, LocalDateTime hasta) {
+    public List<EventoFiltradoDTO> filtrarPorRangoDeFechas(LocalDateTime desde, LocalDateTime hasta) {
         List<Evento> eventos = eventoRepo.filtrarPorRangoDeFechas(desde, hasta);
         if (eventos.isEmpty()) {
             throw new EventoException("No se encontraron eventos en el rango de fechas: " + desde + " a " + hasta);
         }
-        return eventos;
+
+        List<EventoFiltradoDTO> eventoFiltradoDTO = new ArrayList<>();
+
+        for(Evento evento : eventos){
+            eventoFiltradoDTO.add(new EventoFiltradoDTO(
+                    evento.getImagenPortada(),
+                    evento.getNombre(),
+                    evento.getDireccion(),
+                    evento.getCiudad(),
+                    evento.getFecha(),
+                    evento.getTipo(),
+                    evento.getLocalidades()
+            ));
+        }
+
+        return eventoFiltradoDTO;
     }
 
 //    @Override
@@ -284,4 +327,5 @@ public class EventoServiceImp implements EventoService {
 //                evento.getCiudad()
 //        );
 //    }
+
 }

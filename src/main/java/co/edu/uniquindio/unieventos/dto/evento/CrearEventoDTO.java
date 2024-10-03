@@ -2,11 +2,9 @@ package co.edu.uniquindio.unieventos.dto.evento;
 
 import co.edu.uniquindio.unieventos.model.enums.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
-import co.edu.uniquindio.unieventos.model.vo.Localidad;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +12,9 @@ import java.util.List;
 public record CrearEventoDTO(
         @NotEmpty(message = "La imagen de portada es obligatoria.")
         String imagenPortada,
+
+        @NotEmpty(message = "La imagen de las localidades es obligatoria.")
+        String imagenLocalidad,
 
         @NotEmpty(message = "El nombre del evento es obligatorio.")
         String nombre,
@@ -23,9 +24,6 @@ public record CrearEventoDTO(
 
         @NotEmpty(message = "La dirección del evento es obligatoria.")
         String direccion,
-
-        @NotEmpty(message = "La imagen de las localidades es obligatoria.")
-        String imagenLocalidad,
 
         @NotNull(message = "El tipo de evento es obligatorio.")
         TipoEvento tipoEvento,
@@ -41,6 +39,6 @@ public record CrearEventoDTO(
         String ciudad,
 
         @NotNull(message = "La lista de localidades no puede ser nula.")
-        List<LocalidadDTO> listaLocalidades
+        List<CrearLocalidadDTO> listaLocalidades
 ) {
 }

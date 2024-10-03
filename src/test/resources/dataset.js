@@ -52,7 +52,7 @@ db.eventos.insertMany([
         nombre: 'Concierto de despedida del 2024',
         descripcion: 'Concierto con los mejores artistas del 2024 para despedir el año',
         fecha: ISODate('2024-11-11T01:00:00.000Z'),
-        tipo: 'CONCIERTO',
+        tipo: 'FESTIVAL',
         direccion: 'Coliseo de eventos, calle 10 # 10-10',
         ciudad: 'Armenia',
         localidades: [

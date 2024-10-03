@@ -61,7 +61,7 @@ public class CuentaController {
     }
 
     @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<MensajeDTO<String>> eliminarCuenta(@PathVariable String id) throws CuentaException {
+    public ResponseEntity<MensajeDTO<String>> eliminarCuenta(@Valid @PathVariable String id) throws CuentaException {
         try {
             cuentaService.eliminarCuenta(id);
             return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta eliminada exitosamente"));
@@ -71,7 +71,7 @@ public class CuentaController {
     }
 
     @GetMapping("/obtener/{id}")
-    public ResponseEntity<MensajeDTO<InformacionCuentaDTO>> obtenerInformacionCuenta(@PathVariable String id) throws CuentaException{
+    public ResponseEntity<MensajeDTO<InformacionCuentaDTO>> obtenerInformacionCuenta(@Valid @PathVariable String id) throws CuentaException{
         InformacionCuentaDTO info = cuentaService.obtenerInformacionCuenta(id);
         return ResponseEntity.ok(new MensajeDTO<>(false, info));
     }

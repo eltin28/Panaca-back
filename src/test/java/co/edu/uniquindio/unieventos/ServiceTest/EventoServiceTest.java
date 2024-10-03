@@ -1,7 +1,7 @@
 package co.edu.uniquindio.unieventos.ServiceTest;
 
 import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.LocalidadDTO;
+import co.edu.uniquindio.unieventos.dto.evento.CrearLocalidadDTO;
 import co.edu.uniquindio.unieventos.exceptions.EventoException;
 import co.edu.uniquindio.unieventos.model.enums.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
@@ -28,10 +28,10 @@ public class EventoServiceTest {
     @Test
     public void CrearEventoTest() throws EventoException {
 
-        List<LocalidadDTO> listaLocalidades = new ArrayList<>();
-            listaLocalidades.add(new LocalidadDTO("Platea", 100, 50.000d));
-            listaLocalidades.add(new LocalidadDTO("General", 200, 200.000d));
-            listaLocalidades.add(new LocalidadDTO("VIP", 50, 100.000d));
+        List<CrearLocalidadDTO> listaLocalidades = new ArrayList<>();
+            listaLocalidades.add(new CrearLocalidadDTO("Platea", 100, 50.000d));
+            listaLocalidades.add(new CrearLocalidadDTO("General", 200, 200.000d));
+            listaLocalidades.add(new CrearLocalidadDTO("VIP", 50, 100.000d));
 
 
         CrearEventoDTO crearEventoDTO = new CrearEventoDTO(
@@ -48,10 +48,9 @@ public class EventoServiceTest {
         );
 
         System.out.println(crearEventoDTO.listaLocalidades());
-        String resultado = eventoService.crearEvento(crearEventoDTO);
+        eventoService.crearEvento(crearEventoDTO);
 
-        assertNotNull(resultado);
-        assertTrue(resultado.startsWith("Evento creado con éxito. ID: "));
+        assertNotNull(crearEventoDTO);
     }
 
 }

@@ -1,5 +1,7 @@
 package co.edu.uniquindio.unieventos.repository;
 
+import co.edu.uniquindio.unieventos.dto.evento.EventoFiltradoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
 import co.edu.uniquindio.unieventos.model.documents.Evento;
 import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -21,8 +23,8 @@ public interface EventoRepository extends MongoRepository<Evento, String> {
 //    @Query("{ 'nombre' : ?0,'tipoEvento': ?1, 'ciudad': ?2, 'fecha': { $gte: ?3 } }")
 //    List<Evento> filtrarEventosPorTipoCiudadYFecha(String nombre,TipoEvento tipoEvento, String ciudad, LocalDateTime fecha);
 
-    @Query("{ 'tipoEvento': ?0 }")
-    List<Evento> filtrarPorTipo(TipoEvento tipoEvento);
+    @Query("{ 'tipo': ?0 }")
+    List<Evento> filtrarPorTipo(String tipoEvento);
 
     @Query("{ 'fecha': ?0 }")
     List<Evento> filtrarPorFecha(LocalDateTime fecha);
