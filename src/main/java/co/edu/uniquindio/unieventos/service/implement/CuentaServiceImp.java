@@ -103,6 +103,7 @@ public class CuentaServiceImp implements CuentaService {
 
         // Si el código es correcto, activar la cuenta
         cuenta.setEstado(EstadoCuenta.ACTIVO);
+        cuenta.setCodigoVerificacionRegistro(null);
         cuentaRepository.save(cuenta);
 
         return validarCodigoDTO;

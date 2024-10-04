@@ -4,10 +4,12 @@ import co.edu.uniquindio.unieventos.dto.evento.EventoFiltradoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
 import co.edu.uniquindio.unieventos.model.documents.Evento;
 import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +27,6 @@ public interface EventoRepository extends MongoRepository<Evento, String> {
 
     @Query("{ 'tipo': ?0 }")
     List<Evento> filtrarPorTipo(String tipoEvento);
-
-    @Query("{ 'fecha': ?0 }")
-    List<Evento> filtrarPorFecha(LocalDateTime fecha);
 
     @Query("{ 'ciudad': ?0 }")
     List<Evento> filtrarPorCiudad(String ciudad);

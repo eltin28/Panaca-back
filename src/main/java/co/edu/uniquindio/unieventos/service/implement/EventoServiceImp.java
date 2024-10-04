@@ -12,7 +12,7 @@ import co.edu.uniquindio.unieventos.service.service.ImagesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -227,9 +227,10 @@ public class EventoServiceImp implements EventoService {
         return eventoFiltradoDTO;
     }
 
+
     @Override
-    public List<EventoFiltradoDTO> filtrarPorFecha(LocalDateTime fecha) {
-        List<Evento> eventos = eventoRepo.filtrarPorFecha(fecha);
+    public List<EventoFiltradoDTO> filtrarPorFecha(LocalDate fecha) {
+        List<Evento> eventos = eventoRepo.filtrarPorRangoDeFechas(fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay());
         if (eventos.isEmpty()) {
             throw new EventoException("No se encontraron eventos para la fecha: " + fecha);
         }

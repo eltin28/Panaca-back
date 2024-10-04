@@ -32,7 +32,6 @@ public record CrearEventoDTO(
         EstadoEvento estadoEvento,
 
         @NotNull(message = "La fecha del evento es obligatoria.")
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         LocalDateTime fecha,
 
         @NotEmpty(message = "La ciudad es obligatoria.")

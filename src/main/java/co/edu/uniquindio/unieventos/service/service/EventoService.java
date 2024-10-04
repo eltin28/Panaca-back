@@ -5,6 +5,7 @@ import co.edu.uniquindio.unieventos.exceptions.EventoException;
 import co.edu.uniquindio.unieventos.model.documents.Evento;
 import co.edu.uniquindio.unieventos.model.enums.TipoEvento;
 import co.edu.uniquindio.unieventos.model.vo.Localidad;
+import java.time.LocalDate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,7 @@ public interface EventoService {
 
     List<EventoFiltradoDTO> filtrarPorTipo(TipoEvento tipoEvento);
 
-    List<EventoFiltradoDTO> filtrarPorFecha(LocalDateTime fecha);
+    List<EventoFiltradoDTO> filtrarPorFecha(LocalDate fecha);
 
     List<EventoFiltradoDTO> filtrarPorCiudad(String ciudad);
 
