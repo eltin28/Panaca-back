@@ -43,3 +43,6 @@ out/
 ### VS Code ###
 .vscode/
 unievento-90431-firebase-adminsdk-pwxx0-5f21fe191d.json
+
+**/firebase-adminsdk-*.json
+src/main/resources/*.json
