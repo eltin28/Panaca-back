@@ -5,7 +5,7 @@ import Panaca.dto.cupon.EditarCuponDTO;
 import Panaca.dto.cupon.InformacionCuponDTO;
 import Panaca.dto.cupon.ItemsCuponDTO;
 import Panaca.model.documents.Cupon;
-import co.edu.uniquindio.unieventos.dto.cupon.*;
+import Panaca.dto.cupon.*;
 import Panaca.exceptions.CuponException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

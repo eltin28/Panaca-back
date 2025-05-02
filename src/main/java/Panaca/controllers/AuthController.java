@@ -9,7 +9,7 @@ import Panaca.service.service.CuentaService;
 import Panaca.service.service.CuponService;
 import Panaca.service.service.EmailService;
 import Panaca.service.service.EventoService;
-import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import Panaca.dto.cuenta.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

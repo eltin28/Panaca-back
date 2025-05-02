@@ -2,7 +2,7 @@ package Panaca.service.service;
 
 import Panaca.dto.evento.*;
 import Panaca.model.documents.Evento;
-import co.edu.uniquindio.unieventos.dto.evento.*;
+import Panaca.dto.evento.*;
 import Panaca.exceptions.EventoException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

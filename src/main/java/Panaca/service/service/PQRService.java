@@ -5,7 +5,7 @@ import Panaca.dto.PQR.InformacionPQRDTO;
 import Panaca.dto.PQR.ItemPQRDTO;
 import Panaca.dto.PQR.ResponderPQRDTO;
 import Panaca.model.documents.PQR;
-import co.edu.uniquindio.unieventos.dto.PQR.*;
+import Panaca.dto.PQR.*;
 import Panaca.exceptions.PQRException;
 import org.springframework.stereotype.Service;
 

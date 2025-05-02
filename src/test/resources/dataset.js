@@ -1,4 +1,4 @@
-db = connect( 'mongodb://localhost:27017/TestUniEventos' );
+db = connect( 'mongodb://localhost:27017/TestUniPanaca' );
 
 db.cuentas.insertMany([
     {

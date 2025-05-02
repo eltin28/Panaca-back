@@ -15,7 +15,7 @@ import Panaca.model.vo.Usuario;
 import Panaca.service.service.CarritoService;
 import Panaca.service.service.CuentaService;
 import Panaca.service.service.EmailService;
-import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import Panaca.dto.cuenta.*;
 import Panaca.exceptions.CarritoException;
 import Panaca.exceptions.CuentaException;
 import Panaca.repository.CuentaRepository;
@@ -47,8 +47,8 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para crear una cuenta
-     * @param cuentaDTO
-     * @throws CuentaException si la cuenta validada por el email ya existe
+     * param cuentaDTO
+     * throws CuentaException si la cuenta validada por el email ya existe
      */
     @Override
     public void crearCuenta(CrearCuentaDTO cuentaDTO) throws CuentaException, CarritoException {
@@ -104,10 +104,10 @@ public class CuentaServiceImp implements CuentaService {
     /**
      * Metodo para validar que el codigo de el usuario sea el enviado a el correo
      *
-     * @param email
-     * @param codigo
-     * @return
-     * @throws CuentaException
+     * param email
+     * param codigo
+     * return
+     * throws CuentaException
      */
     @Override
     public ValidarCodigoDTO validarCodigo(ValidarCodigoDTO validarCodigoDTO) throws CuentaException {
@@ -181,9 +181,9 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para editar los datos de una cuenta
-     * @param cuenta
-     * @return Mensaje de exito de que los fueros modificados
-     * @throws CuentaException
+     * param cuenta
+     * return Mensaje de exito de que los fueros modificados
+     * throws CuentaException
      */
     @Override
     public void editarCuenta(EditarCuentaDTO cuentaEditada) throws CuentaException {
@@ -214,9 +214,9 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para eliminar una cuenta por su ID
-     * @param id
-     * @return el id de la cuenta eliminada
-     * @throws CuentaException
+     * param id
+     * return el id de la cuenta eliminada
+     * throws CuentaException
      */
     @Override
     public void eliminarCuenta(String id) throws CuentaException{
@@ -237,9 +237,9 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para obtener la informacion de una cuenta
-     * @param id
-     * @return los datos obtenidos de una cuenta por su id
-     * @throws CuentaException
+     * param id
+     * return los datos obtenidos de una cuenta por su id
+     * throws CuentaException
      */
     @Override
     public InformacionCuentaDTO obtenerInformacionCuenta(String id) throws CuentaException {
@@ -266,9 +266,9 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para enviar los codigos de recuperacion para un contraseña
-     * @param correo
-     * @return
-     * @throws CuentaException
+     * param correo
+     * return
+     * throws CuentaException
      */
     @Override
     public void enviarCodigoRecuperacionPassword(CodigoContraseniaDTO codigoContrasenieDTO) throws CuentaException {
@@ -362,9 +362,5 @@ public class CuentaServiceImp implements CuentaService {
                 "id", cuenta.getId()
         );
     }
-
-
-
-
 
 }

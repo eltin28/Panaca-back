@@ -17,7 +17,7 @@ import Panaca.model.documents.Cupon;
 import Panaca.service.service.CuponService;
 import Panaca.service.service.EventoService;
 import Panaca.service.service.ImagesService;
-import co.edu.uniquindio.unieventos.dto.evento.*;
+import Panaca.dto.evento.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

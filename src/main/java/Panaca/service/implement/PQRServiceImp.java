@@ -8,7 +8,7 @@ import Panaca.model.documents.Cuenta;
 import Panaca.model.documents.PQR;
 import Panaca.model.enums.EstadoPQR;
 import Panaca.service.service.PQRService;
-import co.edu.uniquindio.unieventos.dto.PQR.*;
+import Panaca.dto.PQR.*;
 import Panaca.exceptions.PQRException;
 import Panaca.repository.CuentaRepository;
 import Panaca.repository.PQRRepository;

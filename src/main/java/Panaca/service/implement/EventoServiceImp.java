@@ -6,7 +6,7 @@ import Panaca.model.enums.EstadoEvento;
 import Panaca.model.vo.Localidad;
 import Panaca.service.service.EventoService;
 import Panaca.service.service.ImagesService;
-import co.edu.uniquindio.unieventos.dto.evento.*;
+import Panaca.dto.evento.*;
 import Panaca.exceptions.EventoException;
 import Panaca.repository.EventoRepository;
 import lombok.RequiredArgsConstructor;

@@ -3,7 +3,7 @@ package Panaca.service.service;
 import Panaca.dto.autenticacion.TokenDTO;
 import Panaca.dto.cuenta.*;
 import Panaca.model.documents.Cuenta;
-import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import Panaca.dto.cuenta.*;
 import Panaca.exceptions.CarritoException;
 import Panaca.exceptions.CuentaException;
 import org.springframework.stereotype.Service;
