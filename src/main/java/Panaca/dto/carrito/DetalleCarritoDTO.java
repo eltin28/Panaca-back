@@ -16,5 +16,4 @@ public record DetalleCarritoDTO(
 
         @NotBlank(message = "El nombre de la localidad no puede estar vacío")
         String nombreLocalidad
-) {
-}
+) {}

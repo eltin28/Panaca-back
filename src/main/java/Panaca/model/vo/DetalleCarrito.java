@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @ToString
 public class DetalleCarrito {
 
-    @Id
     private String idEvento;
     private int cantidad;
     private String nombreLocalidad;

@@ -59,7 +59,7 @@ public class CarritoServiceImp implements CarritoService {
             throw new CarritoException("La lista de ítems no puede estar vacía.");
         }
 
-        // Obtener el carrito actual del usuario
+        // Obtener el carr  ito actual del usuario
         Carrito carrito = obtenerCarritoPorUsuario(idUsuario);
 
         // Convertir los nuevos items de DTO a DetalleCarrito
@@ -73,7 +73,7 @@ public class CarritoServiceImp implements CarritoService {
         Carrito carritoTemporal = new Carrito(idUsuario, itemsTemporales, LocalDateTime.now());
 
         // Validar la disponibilidad de entradas antes de agregar los ítems al carrito
-        boolean disponibilidad = validarDisponibilidadEntradas(idUsuario);  // Método que ya tienes implementado
+        boolean disponibilidad = validarDisponibilidadEntradas(idUsuario);
 
         // Si no hay suficiente disponibilidad, lanzar una excepción
         if (!disponibilidad) {

@@ -18,6 +18,4 @@ public record CrearCarritoDTO(
         @NotNull(message = "La fecha del evento es obligatoria.")
         @FutureOrPresent (message = "La fecha del carrito no puede ser anterior a la actual")
         LocalDateTime fecha
-
-        ) {
-}
+) {}
