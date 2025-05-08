@@ -1,96 +1,41 @@
-db = connect( 'mongodb://localhost:27017/TestUniPanaca' );
+db = connect( 'mongodb://localhost:27017/panaca-test' );
 
 db.cuentas.insertMany([
     {
         _id: ObjectId('66a2a9aaa8620e3c1c5437be'),
+        cedula: '1234567890',
+        nombre: 'Juan Pérez',
+        telefono: '3001234567',
+        email: 'juan@example.com',
+        password: '$2a$10$hashedpassword',
+        fechaRegistro: '2025-05-07T10:00:00',
         rol: 'CLIENTE',
-        estado: 'INACTIVO',
-        email: 'pepeperez@email.com',
-        password: '$2a$10$Jm7gRmJhZLxbF.r6XZ2ybeyu6b8BJZj8HJ.ZKH/aT2nR7MfukrLaG', // Encriptado
-        usuario: {
-            cedula: '1213444',
-            nombre: 'Pepito Perez',
-            telefono: '3012223333',
-            direccion: 'Calle 12 # 12-12'
-        },
-        fechaRegistro: ISODate('2024-07-25T21:41:57.849Z'),
-        _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cuenta'
+        estado: 'ACTIVO',
+        _class: 'panaca.modelo.documents.Cuenta'
     },
     {
         _id: ObjectId('66a2c14dd9219911cd34f2c0'),
+        cedula: '1098765432',
+        nombre: 'Maria Gomez',
+        telefono: '3017654321',
+        email: 'maria@example.com',
+        password: '$2a$10$hashedpassword',
+        fechaRegistro: '2025-05-07T10:00:00',
         rol: 'CLIENTE',
-        estado: 'ACTIVO',
-        email: 'rosalopez@email.com',
-        password: '$2a$10$yfpGuQ7xfv9sHKq3c.ZWxeFODtdnAz/vTxZkP/3LOhz/CL3NDjIxS', // Encriptado
-        usuario: {
-            cedula: '1213445',
-            nombre: 'Rosa Lopez',
-            telefono: '3128889191',
-            direccion: 'Calle ABC # 12-12'
-        },
-        fechaRegistro: ISODate('2024-08-02T21:41:57.849Z'),
-        _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cuenta'
+        estado: 'INACTIVO',
+        _class: 'panaca.modelo.documents.Cuenta'
     },
     {
         _id: ObjectId('66a2c1517f3b340441ffdeb0'),
+        nombre: 'Admin 1',
         rol: 'ADMINISTRADOR',
         estado: 'ACTIVO',
         email: 'camiloalbran2018@gmail.com',
         password: '$2a$10$k1DGfL5Dh3C/NjRtY1.XjuGrEMHQv9yJY43Q6Cf2FwxfOqQlJ.kCy', // Encriptado
-        usuario: {
-            nombre: 'Admin 1'
-        },
-        fechaRegistro: ISODate('2024-10-09T21:41:57.849Z'),
-        _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cuenta'
-    },
-    {
-        _id: ObjectId('66a3d2424d629f0716d1b111'),
-        rol: 'CLIENTE',
-        estado: 'INACTIVO',
-        email: 'marianamoreno@email.com',
-        password: '$2a$10$yxOEaAad1MP0urZjGjiLTOKLlRt0WmROogYvhNhXz7mKpS7bxCQey', // Encriptado
-        usuario: {
-            cedula: '1213556',
-            nombre: 'Mariana Moreno',
-            telefono: '3001234567',
-            direccion: 'Calle 25 # 20-15'
-        },
-        fechaRegistro: ISODate('2024-09-15T14:30:00.000Z'),
-        _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cuenta'
-    },
-    {
-        _id: ObjectId('66a3d24a7f421707baf98ab0'),
-        rol: 'CLIENTE',
-        estado: 'ACTIVO',
-        email: 'jorgeramirez@email.com',
-        password: '$2a$10$aWKl3B3m1Pbxv4nXNUdhNuKkCb/Mcn/59pWx9PQVDaCpTjYj0MCmC', // Encriptado
-        usuario: {
-            cedula: '1213449',
-            nombre: 'Jorge Ramirez',
-            telefono: '3209876543',
-            direccion: 'Calle 30 # 25-18'
-        },
-        fechaRegistro: ISODate('2024-09-25T09:15:00.000Z'),
-        _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cuenta'
-    },
-    {
-        _id: ObjectId('66b3c1a28e2100008f40a2d2'),
-        rol: 'CLIENTE',
-        estado: 'ACTIVO',
-        email: 'julianmorales@email.com',
-        password: '$2a$10$examplePasswordHash', // Encriptado
-        usuario: {
-            cedula: '1213446',
-            nombre: 'Julian Morales',
-            telefono: '3135556666',
-            direccion: 'Carrera 5 # 10-20'
-        },
-        fechaRegistro: ISODate('2024-10-10T21:00:00.000Z'),
-        _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cuenta'
+        fechaRegistro: '2025-05-07T10:00:00',
+        _class: 'panaca.modelo.documents.Cuenta'
     }
-]);
-
-
+])
 db.eventos.insertMany([
     {
         _id: ObjectId('66a2c476991cff088eb80aaf'),
@@ -222,7 +167,7 @@ db.eventos.insertMany([
         imagenLocalidad: 'Url de la imagen de la distribución de las zonas',
         _class: 'co.edu.uniquindio.proyecto.modelo.documents.Evento'
     }
-]);
+])
 
 db.ordenes.insertMany([
     {
@@ -310,8 +255,7 @@ db.ordenes.insertMany([
         total: 32.0,  // Descuento aplicado por el cupón
         _class: 'co.edu.uniquindio.proyecto.modelo.documents.Orden'
     }
-]);
-
+])
 
 db.carritos.insertMany([
     {
@@ -402,7 +346,7 @@ db.carritos.insertMany([
         fecha: ISODate('2024-10-13T14:00:00.000Z'),
         _class: 'co.edu.uniquindio.proyecto.modelo.documents.Carrito'
     }
-]);
+])
 
 db.cupones.insertMany([
     {
@@ -460,7 +404,7 @@ db.cupones.insertMany([
         estadoCupon: 'DISPONIBLE',
         _class: 'co.edu.uniquindio.proyecto.modelo.documents.Cupon'
     }
-]);
+])
 
 db.pqr.insertMany([
     {
@@ -498,7 +442,4 @@ db.pqr.insertMany([
         descripcion: 'El sistema no me dejó inscribirme en el evento.',
         _class: 'co.edu.uniquindio.proyecto.modelo.documents.PQR'
     }
-]);
-
-
-
+])

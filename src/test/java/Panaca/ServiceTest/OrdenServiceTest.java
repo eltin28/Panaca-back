@@ -4,10 +4,7 @@ import Panaca.dto.cuenta.InformacionCuentaDTO;
 import Panaca.dto.orden.CrearOrdenDTO;
 import Panaca.dto.orden.DetalleOrdenDTO;
 import Panaca.dto.orden.MostrarOrdenDTO;
-import Panaca.exceptions.CarritoException;
-import Panaca.exceptions.CuentaException;
-import Panaca.exceptions.CuponException;
-import Panaca.exceptions.OrdenException;
+import Panaca.dto.orden.MostrarDetalleOrdenDTO;
 import Panaca.model.documents.Carrito;
 import Panaca.model.documents.Evento;
 import Panaca.model.documents.Orden;
@@ -15,7 +12,6 @@ import Panaca.model.enums.TipoEvento;
 import Panaca.model.vo.DetalleCarrito;
 import Panaca.model.vo.DetalleOrden;
 import Panaca.repository.CarritoRepository;
-import Panaca.repository.CuponRepository;
 import Panaca.repository.OrdenRepository;
 import Panaca.service.service.CuentaService;
 import Panaca.service.service.EventoService;
@@ -24,15 +20,13 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -46,129 +40,125 @@ public class OrdenServiceTest {
     private CarritoRepository carritoRepository;
 
     @Autowired
-    private CuponRepository cuponRepository;
-
-    @Autowired
     private OrdenRepository ordenRepository;
 
-    @Autowired
+    @MockBean
     private EventoService eventoService;
 
-    @Autowired
+    @MockBean
     private CuentaService cuentaService;
 
     @Test
-    public void testCrearOrdenDesdeCarrito() throws OrdenException, CarritoException, CuponException {
-        // Datos de prueba
-        String idCliente = "cliente123";
-        String codigoCupon = "cupon123";
+    public void testCrearOrdenDesdeCarrito() throws Exception {
+        String idCliente = new ObjectId().toHexString();
         String codigoPasarela = "pasarela123";
 
-        // Crear un carrito para el cliente
+        Evento evento = new Evento();
+        evento.setId("66a2c476991cff088eb80aaf");
+        evento.setPrecio(100f);
+        evento.setNombre("Show Animal");
+        evento.setTipo(TipoEvento.ADULTO);
+        evento.setImagenPortada("url");
+
+        when(eventoService.obtenerInformacionEvento(evento.getId())).thenReturn(evento);
+
+        // Crear carrito con un solo item
         Carrito carrito = new Carrito();
         carrito.setIdUsuario(idCliente);
-        List<DetalleCarrito> detalles = new ArrayList<>();
-        detalles.add(new DetalleCarrito("66a2c476991cff088eb80aaf", "VIP", 2, 100.0f, LocalDate.now()));
+        List<DetalleCarrito> detalles = List.of(
+                new DetalleCarrito(evento.getId(), 2, LocalDate.now())
+        );
         carrito.setItems(detalles);
         carritoRepository.save(carrito);
 
-        // Llamada al método que queremos probar
-        ordenService.crearOrdenDesdeCarrito(idCliente, codigoCupon, codigoPasarela);
+        ordenService.crearOrdenDesdeCarrito(idCliente, null, codigoPasarela);
 
-        // Verificar que la orden fue creada
         List<Orden> ordenes = ordenRepository.findByIdCliente(idCliente);
-        assertFalse(ordenes.isEmpty(), "La orden debería haber sido creada");
-        Orden ordenCreada = ordenes.get(0);
-        assertEquals(2, ordenCreada.getDetalle().get(0).getCantidad());
-        assertEquals(100.0, ordenCreada.getDetalle().get(0).getPrecio());
-    }
-
-
-    @Test
-    public void testCrearOrden() throws OrdenException {
-        // Datos de prueba
-        String idCliente = "cliente123";
-        String codigoCupon = "cupon123";
-        String codigoPasarela = "pasarela123";
-
-        List<DetalleOrdenDTO> detallesOrdenDTO = new ArrayList<>();
-        detallesOrdenDTO.add(new DetalleOrdenDTO("66a2c476991cff088eb80aaf", "VIP", 100, 2));
-
-        CrearOrdenDTO crearOrdenDTO = new CrearOrdenDTO(idCliente, codigoCupon, codigoPasarela, LocalDate.now(), detallesOrdenDTO);
-
-        // Llamar al método que estamos probando
-        ordenService.crearOrden(crearOrdenDTO, 200.0);
-
-        // Verificar que la orden fue creada correctamente
-        List<Orden> ordenes = ordenRepository.findByIdCliente(String.valueOf(new ObjectId(idCliente)));
-        assertFalse(ordenes.isEmpty(), "La orden debería haber sido creada");
-        Orden ordenCreada = ordenes.get(0);
-        assertEquals(200.0, ordenCreada.getTotal());
+        assertFalse(ordenes.isEmpty());
+        assertEquals(2, ordenes.get(0).getDetalle().get(0).getCantidad());
     }
 
     @Test
-    public void testMostrarOrden() throws OrdenException, CuentaException {
-        // Datos de prueba
-        String idOrden = "orden123";
-        String idCliente = "cliente123";
+    public void testCrearOrden() throws Exception {
+        String idCliente = new ObjectId().toHexString();
+        String eventoId = new ObjectId().toHexString();
 
-        // Crear una orden de prueba en la base de datos
+        DetalleOrdenDTO detalle = new DetalleOrdenDTO(
+                eventoId, 2, LocalDate.now()
+        );
+
+        CrearOrdenDTO ordenDTO = new CrearOrdenDTO(
+                idCliente, null, "pasarela", LocalDate.now(), List.of(detalle)
+        );
+
+        ordenService.crearOrden(ordenDTO, 200.0);
+
+        List<Orden> ordenes = ordenRepository.findByIdCliente(idCliente);
+        assertFalse(ordenes.isEmpty());
+        assertEquals(200.0, ordenes.get(0).getTotal());
+    }
+
+    @Test
+    public void testMostrarOrden() throws Exception {
+        String idOrden = new ObjectId().toHexString();
+        String idCliente = new ObjectId().toHexString();
+        String idEvento = new ObjectId().toHexString();
+
+        // Simula orden con un detalle
         Orden orden = new Orden();
         orden.setId(idOrden);
-        orden.setIdCliente(idCliente);
-        List<DetalleOrden> detalles = new ArrayList<>();
-        detalles.add(new DetalleOrden("evento123", "Localidad VIP", 1, 200.0));
-        orden.setDetalle(detalles);
+        orden.setIdCliente(new ObjectId(idCliente));
         orden.setFecha(LocalDate.now());
+        orden.setCodigoCupon("BIENVENIDO15");
+        orden.setTotal(200.0);
+        orden.setDetalle(List.of(
+                new DetalleOrden(new ObjectId(idEvento), 2, LocalDate.now())
+        ));
         ordenRepository.save(orden);
 
-        // Crear cuenta de prueba
-        InformacionCuentaDTO cuenta = new InformacionCuentaDTO(idCliente, "1234567890", "Juan Perez", "0987654321", "Direccion", "juan@example.com");
+        // Mock evento asociado
+        Evento evento = new Evento();
+        evento.setId(idEvento);
+        evento.setNombre("Concierto Acústico");
+        evento.setTipo(TipoEvento.ADULTO);
+        evento.setPrecio(100f);
+        evento.setImagenPortada("url");
 
-        // Stub para obtener la información del usuario y del evento
-        when(cuentaService.obtenerInformacionCuenta(anyString())).thenReturn(cuenta);
-        when(eventoService.obtenerInformacionEvento(anyString())).thenReturn(new Evento("evento123", "Concierto", TipoEvento.CONCIERTO, "Ciudad X", LocalDate.now()));
+        // Mock cuenta asociada
+        when(eventoService.obtenerInformacionEvento(idEvento)).thenReturn(evento);
+        when(cuentaService.obtenerInformacionCuenta(idCliente))
+                .thenReturn(new InformacionCuentaDTO(idCliente, "123", "Juan", "999", "juan@mail.com"));
 
-        // Llamar al método que estamos probando
-        MostrarOrdenDTO resultado = ordenService.mostrarOrden(idOrden);
+        // Ejecutar lógica
+        MostrarOrdenDTO dto = ordenService.mostrarOrden(idOrden);
 
-        // Verificar el resultado
-        assertNotNull(resultado);
-        assertEquals("Juan Perez", resultado.nombreUsuario());
-        assertEquals("Concierto", resultado.nombreEvento());
-        assertEquals(100.0, resultado.precio());
+        // Verificación general
+        assertEquals("Juan", dto.nombreUsuario());
+        assertEquals("BIENVENIDO15", dto.cupon());
+        assertEquals(200.0, dto.total());
+        assertEquals(1, dto.detalles().size());
+
+        // Verificación del detalle
+        MostrarDetalleOrdenDTO detalle = dto.detalles().get(0);
+        assertEquals("Concierto Acústico", detalle.nombreEvento());
+        assertEquals(100f, detalle.precio());
+        assertEquals(2, detalle.cantidad());
+        assertEquals(TipoEvento.ADULTO, detalle.tipoEvento());
     }
 
-
     @Test
-    public void testEliminarOrden() throws OrdenException {
-        // Datos de prueba
-        String idOrden = "orden123";
-        String idCliente = "cliente123";
-
-        // Crear una orden de prueba en la base de datos
+    public void testEliminarOrden() throws Exception {
+        String idOrden = new ObjectId().toHexString();
         Orden orden = new Orden();
         orden.setId(idOrden);
-        orden.setIdCliente(idCliente);
-        List<DetalleOrden> detalles = new ArrayList<>();
-        detalles.add(new DetalleOrden("100.0", "Localidad VIP", 12, 100.0));
-        orden.setDetalle(detalles);
+        orden.setIdCliente(new ObjectId());
+        orden.setDetalle(List.of(
+                new DetalleOrden(new ObjectId(), 1, LocalDate.now())
+        ));
         ordenRepository.save(orden);
 
-        // Llamar al método de eliminación
         ordenService.eliminarOrden(idOrden);
 
-        // Verificar que la orden fue eliminada
-        Optional<Orden> ordenEliminada = ordenRepository.findById(idOrden);
-        assertTrue(ordenEliminada.isEmpty(), "La orden debería haber sido eliminada");
+        assertTrue(ordenRepository.findById(idOrden).isEmpty());
     }
-
-
-
-
 }
-
-
-
-
-

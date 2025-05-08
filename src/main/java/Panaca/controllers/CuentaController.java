@@ -13,17 +13,19 @@ import Panaca.exceptions.*;
 import Panaca.model.documents.Carrito;
 import Panaca.model.documents.PQR;
 import Panaca.service.service.*;
-import Panaca.dto.cuenta.*;
-import Panaca.exceptions.*;
-import Panaca.service.service.*;
+import Panaca.configs.*;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import com.mercadopago.resources.preference.Preference;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -44,172 +46,161 @@ public class CuentaController {
     @Autowired
     OrdenService ordenService;
 
+//==================================== METODOS PERFIL =============================================//
+
+    @PreAuthorize("hasRole('CLIENTE')")
     @PutMapping("/editar-perfil")
     public ResponseEntity<MensajeDTO<String>> editarCuenta(@Valid @RequestBody EditarCuentaDTO cuenta) throws CuentaException {
-        try {
-            cuentaService.editarCuenta(cuenta);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta editada exitosamente"));
-        }catch (CuentaException e){
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
-        }
+        cuentaService.editarCuenta(cuenta);
+        return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta editada exitosamente"));
     }
 
-    @DeleteMapping("/eliminar-cuenta/{id}")
-    public ResponseEntity<MensajeDTO<String>> eliminarCuenta(@Valid @PathVariable String id) throws CuentaException {
-        try {
-            cuentaService.eliminarCuenta(id);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta eliminada exitosamente"));
-        }catch (CuentaException e){
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
-        }
+    @PreAuthorize("hasRole('CLIENTE')")
+    @DeleteMapping("/eliminar-cuenta")
+    public ResponseEntity<MensajeDTO<String>> eliminarCuenta(Authentication authentication) throws CuentaException {
+        String id = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
+        cuentaService.eliminarCuenta(id);
+        return ResponseEntity.ok(new MensajeDTO<>(false, "Cuenta eliminada exitosamente"));
     }
 
-    @GetMapping("/obtener-informacion/{id}")
-    public ResponseEntity<MensajeDTO<InformacionCuentaDTO>> obtenerInformacionCuenta(@Valid @PathVariable String id) throws CuentaException{
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/obtener-informacion")
+    public ResponseEntity<MensajeDTO<InformacionCuentaDTO>> obtenerInformacionCuenta(Authentication authentication) throws CuentaException {
+        String id = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         InformacionCuentaDTO info = cuentaService.obtenerInformacionCuenta(id);
         return ResponseEntity.ok(new MensajeDTO<>(false, info));
     }
 
+//==================================== METODOS PQR =============================================//
 
-    //==================================== METODOS PQR =============================================//
-
-    /**
-     * Método para crear una nueva PQR.
-     * @param crearPQRDTO Datos de la PQR a crear.
-     * @return La PQR creada.
-     */
+    @PreAuthorize("hasRole('CLIENTE')")
     @PostMapping("/crear-pqr")
-    public ResponseEntity<MensajeDTO<String>> crearPQR(@Valid @RequestBody CrearPQRDTO crearPQRDTO) {
-        try {
-            PQRService.crearPQR(crearPQRDTO);
-            return ResponseEntity.ok(new MensajeDTO<>(true,"PQR creada exitosamente"));
-        } catch (PQRException e) {
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false,e.getMessage()));
-        }
+    public ResponseEntity<MensajeDTO<String>> crearPQR(@Valid @RequestBody CrearPQRDTO crearPQRDTO) throws PQRException {
+        PQRService.crearPQR(crearPQRDTO);
+        return ResponseEntity.ok(new MensajeDTO<>(true, "PQR creada exitosamente"));
     }
 
-    /**
-     * Método para listar todas las PQRs.
-     * @return Lista de PQRs.
-     */
+    @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/listar-pqr")
     public ResponseEntity<MensajeDTO<List<ItemPQRDTO>>> listarPQRs() throws PQRException {
         List<ItemPQRDTO> pqrList = PQRService.listarPQRs();
-        return ResponseEntity.badRequest().body(new MensajeDTO<>(true,pqrList));
+        return ResponseEntity.ok(new MensajeDTO<>(true, pqrList));
     }
 
-    @GetMapping("/obtener-pqr-usuario/{id}")
-    public ResponseEntity<MensajeDTO<List<PQR>>> obtenerPQRsPorUsuario(@Valid @PathVariable String id) throws PQRException {
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/obtener-pqr-usuario")
+    public ResponseEntity<MensajeDTO<List<PQR>>> obtenerPQRsPorUsuario(Authentication authentication) throws PQRException {
+        String id = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         List<PQR> pqrsObtenidos = PQRService.obtenerPQRsPorUsuario(id);
         return ResponseEntity.ok(new MensajeDTO<>(true, pqrsObtenidos));
     }
 
-    //==================================== METODOS CARRITO =============================================//
+//==================================== METODOS CARRITO =============================================//
 
-    @PutMapping("/agregar-items-carrito/{idUsuario}")
-    public ResponseEntity<MensajeDTO<String>> agregarItemsAlCarrito(@PathVariable String idUsuario, @Valid @RequestBody List<DetalleCarritoDTO> itemsCarritoDTO) throws CarritoException {
+    @PreAuthorize("hasRole('CLIENTE')")
+    @PutMapping("/agregar-items-carrito")
+    public ResponseEntity<MensajeDTO<String>> agregarItemsAlCarrito(Authentication authentication, @Valid @RequestBody List<DetalleCarritoDTO> itemsCarritoDTO) throws CarritoException {
+        String idUsuario = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         carritoService.agregarItemsAlCarrito(idUsuario, itemsCarritoDTO);
         return ResponseEntity.ok(new MensajeDTO<>(false, "Items agregados exitosamente al carrito."));
     }
 
-    @GetMapping("/obtener-carrito/{idUsuario}")
-    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(@PathVariable String idUsuario) throws CarritoException {
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/obtener-carrito")
+    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(Authentication authentication) throws CarritoException {
+        String idUsuario = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         Carrito carrito = carritoService.obtenerCarritoPorUsuario(idUsuario);
         return ResponseEntity.ok(new MensajeDTO<>(false, carrito));
     }
 
-    @DeleteMapping("/eliminar-item-carrito/{idUsuario}/{nombreLocalidad}")
-    public ResponseEntity<MensajeDTO<String>> eliminarItemDelCarrito(@PathVariable String idUsuario, @PathVariable String nombreLocalidad) throws CarritoException {
-        carritoService.eliminarItemDelCarrito(idUsuario, nombreLocalidad);
+    @PreAuthorize("hasRole('CLIENTE')")
+    @DeleteMapping("/eliminar-item-carrito/{idEvento}/{fechaUso}")
+    public ResponseEntity<MensajeDTO<String>> eliminarItemDelCarrito(
+            Authentication authentication,
+            @PathVariable String idEvento,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaUso
+    ) throws CarritoException {
+        String idUsuario = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
+        carritoService.eliminarItemDelCarrito(idUsuario, idEvento, fechaUso);
         return ResponseEntity.ok(new MensajeDTO<>(false, "Item eliminado del carrito exitosamente."));
     }
 
-    @DeleteMapping("/vaciar-carrito/{idUsuario}")
-    public ResponseEntity<MensajeDTO<String>> vaciarCarrito(@PathVariable String idUsuario) throws CarritoException {
+    @PreAuthorize("hasRole('CLIENTE')")
+    @DeleteMapping("/vaciar-carrito")
+    public ResponseEntity<MensajeDTO<String>> vaciarCarrito(Authentication authentication) throws CarritoException {
+        String idUsuario = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         carritoService.vaciarCarrito(idUsuario);
         return ResponseEntity.ok(new MensajeDTO<>(false, "Carrito vaciado exitosamente."));
     }
 
-    @GetMapping("/listar-productos-carrito/{idUsuario}")
-    public ResponseEntity<MensajeDTO<List<InformacionEventoCarritoDTO>>> listarProductosEnCarrito(@PathVariable String idUsuario) throws CarritoException {
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/listar-productos-carrito")
+    public ResponseEntity<MensajeDTO<List<InformacionEventoCarritoDTO>>> listarProductosEnCarrito(Authentication authentication) throws CarritoException {
+        String idUsuario = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         List<InformacionEventoCarritoDTO> itemsCarrito = carritoService.listarProductosEnCarrito(idUsuario);
         return ResponseEntity.ok(new MensajeDTO<>(false, itemsCarrito));
     }
 
-    // Método para calcular el total del carrito
-    @GetMapping("/total-carrito/{idUsuario}")
-    public ResponseEntity<MensajeDTO<Double>> calcularTotalCarrito(@PathVariable String idUsuario) throws CarritoException {
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/total-carrito")
+    public ResponseEntity<MensajeDTO<Double>> calcularTotalCarrito(Authentication authentication) throws CarritoException {
+        String idUsuario = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
         double total = carritoService.calcularTotalCarrito(idUsuario);
         return ResponseEntity.ok(new MensajeDTO<>(false, total));
     }
 
-    // Método para validar la disponibilidad de entradas
-    @GetMapping("/validar-disponibilidad/{idUsuario}")
-    public ResponseEntity<MensajeDTO<Boolean>> validarDisponibilidadEntradas(@PathVariable String idUsuario) throws CarritoException {
-        boolean disponible = carritoService.validarDisponibilidadEntradas(idUsuario);
-        return ResponseEntity.ok(new MensajeDTO<>(false, disponible));
-    }
 
-    //==================================== METODOS ORDEN =============================================//
+//==================================== METODOS ORDEN =============================================//
 
-    /*
-    @PostMapping("/crear-orden")
-    public ResponseEntity<MensajeDTO<String>> crearOrden(@Valid @RequestBody CrearOrdenDTO ordenDTO, @Valid @RequestBody double totalOrden) throws OrdenException {
-        try {
-            ordenService.crearOrden(ordenDTO, totalOrden);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Orden creada exitosamente"));
-        }catch (OrdenException e){
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
-        }
-    }
-
-    */
-
+    @PreAuthorize("hasRole('CLIENTE')")
     @GetMapping("/mostrar-orden/{idOrden}")
     public ResponseEntity<MensajeDTO<MostrarOrdenDTO>> mostrarOrden(@PathVariable String idOrden) throws CuentaException, OrdenException {
-            MostrarOrdenDTO ordenDTO = ordenService.mostrarOrden(idOrden);
-            return ResponseEntity.ok(new MensajeDTO<>(false, ordenDTO));
+        MostrarOrdenDTO ordenDTO = ordenService.mostrarOrden(idOrden);
+        return ResponseEntity.ok(new MensajeDTO<>(false, ordenDTO));
     }
+
+    @PreAuthorize("hasRole('CLIENTE')")
     @PutMapping("/actualizar-orden/{id}")
-    public ResponseEntity<MensajeDTO<String>> actualizarOrden(@Valid @PathVariable String id, @Valid @RequestBody EditarOrdenDTO ordenDTO) throws OrdenException {
-        try {
-            ordenService.actualizarOrden(id, ordenDTO);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Orden actualizada exitosamente."));
-        }catch (OrdenException e){
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
-        }
+    public ResponseEntity<MensajeDTO<String>> actualizarOrden(@PathVariable String id, @RequestBody @Valid EditarOrdenDTO ordenDTO) throws OrdenException, CuponException {
+        ordenService.actualizarOrden(id, ordenDTO);
+        return ResponseEntity.ok(new MensajeDTO<>(false, "Orden actualizada exitosamente."));
     }
 
+    @PreAuthorize("hasRole('CLIENTE')")
     @DeleteMapping("/eliminar-orden/{id}")
-    public ResponseEntity<MensajeDTO<String>> eliminarOrden(@Valid @PathVariable String id) throws OrdenException {
-        try {
-            ordenService.eliminarOrden(id);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Orden eliminada exitosamente."));
-        }catch (OrdenException e){
-            return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
-        }
+    public ResponseEntity<MensajeDTO<String>> eliminarOrden(@PathVariable String id) throws OrdenException {
+        ordenService.eliminarOrden(id);
+        return ResponseEntity.ok(new MensajeDTO<>(false, "Orden eliminada exitosamente."));
     }
 
+//==================================== METODOS PAGO =============================================//
+
+    @PreAuthorize("hasRole('CLIENTE')")
     @PostMapping("/realizar-pago")
-    public ResponseEntity<MensajeDTO<Preference>> realizarPago(@RequestParam("idOrden") String idOrden) throws Exception{
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, ordenService.realizarPago(idOrden)));
+    public ResponseEntity<MensajeDTO<Preference>> realizarPago(@RequestParam("idOrden") String idOrden) throws Exception {
+        Preference preference = ordenService.realizarPago(idOrden);
+        return ResponseEntity.ok(new MensajeDTO<>(false, preference));
     }
 
+    // Este endpoint no lleva seguridad, lo llama MercadoPago externamente
     @PostMapping("/notificacion-pago")
     public void recibirNotificacionMercadoPago(@RequestBody Map<String, Object> requestBody) {
         ordenService.recibirNotificacionMercadoPago(requestBody);
     }
 
+    @PreAuthorize("hasRole('CLIENTE')")
     @PostMapping("/crear-orden")
-    public ResponseEntity<MensajeDTO<String>> crearOrdenDesdeCarrito(@RequestParam String idCliente,
-                                                    @RequestParam(required = false) String idCupon,
-                                                    @RequestParam(required = false) String codigoPasarela) {
+    public ResponseEntity<MensajeDTO<String>> crearOrdenDesdeCarrito(
+            Authentication authentication,
+            @RequestParam(required = false) String idCupon,
+            @RequestParam(required = false) String codigoPasarela
+    ) {
         try {
+            String idCliente = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
             ordenService.crearOrdenDesdeCarrito(idCliente, idCupon, codigoPasarela);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Orden desde carrito exitosamente."));
+            return ResponseEntity.ok(new MensajeDTO<>(false, "Orden creada exitosamente desde el carrito."));
         } catch (OrdenException | CarritoException | CuponException e) {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
-
 }

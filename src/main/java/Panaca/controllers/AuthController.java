@@ -9,7 +9,6 @@ import Panaca.service.service.CuentaService;
 import Panaca.service.service.CuponService;
 import Panaca.service.service.EmailService;
 import Panaca.service.service.EventoService;
-import Panaca.dto.cuenta.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,10 @@ public class AuthController {
 
     /**
      * Metodo para crear la cuenta de un usuario
-     * @param cuentaDTO
-     * @return El DTO de la cuenta creada
-     * @throws CuentaException
-     * @throws CarritoException
+     * param cuentaDTO
+     * return El DTO de la cuenta creada
+     * throws CuentaException
+     * throws CarritoException
      */
     @PostMapping("/crear-cuenta")
     public ResponseEntity<MensajeDTO<String>> crearCuenta(@Valid @RequestBody CrearCuentaDTO cuentaDTO) throws CuentaException, CarritoException {
@@ -61,7 +60,7 @@ public class AuthController {
     public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacion(@Valid @RequestBody CodigoContraseniaDTO codigoContraseniaDTO) throws CuentaException{
         try {
             cuentaService.enviarCodigoRecuperacionPassword(codigoContraseniaDTO);
-            return ResponseEntity.ok(new MensajeDTO<>(false, "Codigo enviado con a su emial correctamente"));
+            return ResponseEntity.ok(new MensajeDTO<>(false, "Código enviado correctamente al correo electrónico."));
         }catch (CuentaException e){
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }catch (RuntimeException e){
@@ -71,9 +70,9 @@ public class AuthController {
 
     /**
      * Metodo para modificar la contraseña, ya sea usuario o admin
-     * @param cambiarPasswordDTO
-     * @return El DTO con la password modificada
-     * @throws CuentaException
+     * param cambiarPasswordDTO
+     * return El DTO con la password modificada
+     * throws CuentaException
      */
     @PutMapping("/cambiar-password")
     public ResponseEntity<MensajeDTO<String>> cambiarPassword(@Valid @RequestBody CambiarPasswordDTO cambiarPasswordDTO) throws CuentaException{
@@ -92,5 +91,4 @@ public class AuthController {
         TokenDTO token = cuentaService.iniciarSesion(loginDTO);
         return ResponseEntity.ok(new MensajeDTO<>(false, token));
     }
-
 }

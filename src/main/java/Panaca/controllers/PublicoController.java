@@ -2,7 +2,6 @@ package Panaca.controllers;
 
 import Panaca.dto.autenticacion.MensajeDTO;
 import Panaca.dto.evento.EventoFiltradoDTO;
-import Panaca.dto.evento.FiltroEventoDTO;
 import Panaca.dto.evento.ItemEventoDTO;
 import Panaca.exceptions.EventoException;
 import Panaca.model.documents.Evento;
@@ -10,8 +9,6 @@ import Panaca.service.service.CuentaService;
 import Panaca.service.service.CuponService;
 import Panaca.service.service.EmailService;
 import Panaca.service.service.EventoService;
-import Panaca.dto.cuenta.*;
-import Panaca.exceptions.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +38,8 @@ public class PublicoController {
     //==================================== METODOS EVENTO =============================================//
 
     @PostMapping("/filtrar-eventos")
-    public ResponseEntity<MensajeDTO<List<EventoFiltradoDTO>>> filtrarEventos(@RequestBody FiltroEventoDTO filtroEventoDTO) throws EventoException {
-        List<EventoFiltradoDTO> eventosFiltrados = eventoService.filtrarEventos(filtroEventoDTO);
+    public ResponseEntity<MensajeDTO<List<EventoFiltradoDTO>>> filtrarEventos(@RequestBody EventoFiltradoDTO filtro) throws EventoException {
+        List<EventoFiltradoDTO> eventosFiltrados = eventoService.filtrarEventos(filtro);
         return ResponseEntity.ok(new MensajeDTO<>(true, eventosFiltrados));
     }
 
@@ -56,5 +53,4 @@ public class PublicoController {
     public ResponseEntity<Evento> obtenerInfoEvento(@Valid @PathVariable("id") String id) throws EventoException {
         return ResponseEntity.ok(eventoService.obtenerInformacionEvento(id));
     }
-
 }

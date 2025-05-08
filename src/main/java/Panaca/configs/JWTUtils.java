@@ -9,14 +9,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
-
 @Component
 public class JWTUtils {
 
     public String generarToken(String email, Map<String, Object> claims){
 
         Instant now = Instant.now();
-
 
         return Jwts.builder()
                 .claims(claims)
@@ -37,7 +35,4 @@ public class JWTUtils {
         byte[] secretKeyBytes = claveSecreta.getBytes();
         return Keys.hmacShaKeyFor(secretKeyBytes);
     }
-
-
 }
-

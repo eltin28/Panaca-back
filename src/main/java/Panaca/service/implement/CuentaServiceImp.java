@@ -11,11 +11,9 @@ import Panaca.model.enums.EstadoCuenta;
 import Panaca.model.enums.EstadoCupon;
 import Panaca.model.enums.Rol;
 import Panaca.model.enums.TipoCupon;
-import Panaca.model.vo.Usuario;
 import Panaca.service.service.CarritoService;
 import Panaca.service.service.CuentaService;
 import Panaca.service.service.EmailService;
-import Panaca.dto.cuenta.*;
 import Panaca.exceptions.CarritoException;
 import Panaca.exceptions.CuentaException;
 import Panaca.repository.CuentaRepository;
@@ -56,26 +54,23 @@ public class CuentaServiceImp implements CuentaService {
         if (cuentaRepository.existsByEmail(cuentaDTO.email())) {
             throw new CuentaException("Ya existe una cuenta registrada con este email electrónico.");
         }
-        if(cuentaRepository.equals(cuentaDTO.cedula())){
+        if(cuentaRepository.existsByCedula(cuentaDTO.cedula())){
             throw new CuentaException("Ya existe una cuenta registrada con esta cedula.");
         }
 
         // Crear instancia de Cuenta con datos del DTO
         Cuenta nuevaCuenta = new Cuenta();
+        nuevaCuenta.setCedula(cuentaDTO.cedula());
+        nuevaCuenta.setNombre(cuentaDTO.nombre());
+        nuevaCuenta.setTelefono(cuentaDTO.telefono());
         nuevaCuenta.setEmail(cuentaDTO.email());
-        nuevaCuenta.setPassword(cuentaDTO.password());
-        nuevaCuenta.setFechaRegistro(LocalDateTime.now());
-        nuevaCuenta.setRol(Rol.CLIENTE);
-        nuevaCuenta.setUsuario(new Usuario(
-                cuentaDTO.cedula(),
-                cuentaDTO.nombre(),
-                cuentaDTO.telefono(),
-                cuentaDTO.direccion()
-        ));
-        nuevaCuenta.setEstado(EstadoCuenta.INACTIVO);
 
         String encrptar = encriptarPassword(cuentaDTO.password());
         nuevaCuenta.setPassword(encrptar);
+
+        nuevaCuenta.setFechaRegistro(LocalDateTime.now());
+        nuevaCuenta.setRol(Rol.CLIENTE);
+        nuevaCuenta.setEstado(EstadoCuenta.INACTIVO);
 
         // Generar y asignar el código de validación
         String codigoValidacion = generarCodigoValidacion();
@@ -88,8 +83,7 @@ public class CuentaServiceImp implements CuentaService {
         // Lógica para crear el carrito automáticamente
         CrearCarritoDTO carritoDTO = new CrearCarritoDTO(
                 cuentaCreada.getId(),
-                new ArrayList<>(),
-                LocalDateTime.now()
+                new ArrayList<>()
         );
         carritoService.crearCarrito(carritoDTO);
 
@@ -103,7 +97,6 @@ public class CuentaServiceImp implements CuentaService {
 
     /**
      * Metodo para validar que el codigo de el usuario sea el enviado a el correo
-     *
      * param email
      * param codigo
      * return
@@ -197,13 +190,10 @@ public class CuentaServiceImp implements CuentaService {
 
         //Obtenemos la cuenta del usuario a modificar y actualizamos sus datos
         Cuenta cuentaModificada = optionalCuenta.get();
-        cuentaModificada.getUsuario().setNombre( cuentaEditada.nombre() );
-        cuentaModificada.getUsuario().setTelefono( cuentaEditada.telefono() );
-        cuentaModificada.getUsuario().setDireccion( cuentaEditada.direccion() );
+        cuentaModificada.setNombre( cuentaEditada.nombre() );
+        cuentaModificada.setTelefono( cuentaEditada.telefono() );
         // Actualizar la contraseña si se proporciona
         if (cuentaEditada.password() != null && !cuentaEditada.password().isEmpty()) {
-            String nuevaPassword = cuentaEditada.password();
-            cuentaModificada.setPassword( cuentaEditada.password() );
             String encrptar = encriptarPassword(cuentaEditada.password());
             cuentaModificada.setPassword(encrptar);
         }
@@ -230,7 +220,7 @@ public class CuentaServiceImp implements CuentaService {
 
         //Obtenemos la cuenta del usuario que se quiere eliminar y le asignamos el estado eliminado
         Cuenta cuenta = optionalCuenta.get();
-        cuenta.setEstado(EstadoCuenta.ELIMINADO);
+        cuenta.setEstado(EstadoCuenta.INACTIVO);
 
         cuentaRepository.save(cuenta);
     }
@@ -256,10 +246,9 @@ public class CuentaServiceImp implements CuentaService {
 
         return new InformacionCuentaDTO(
                 cuenta.getId(),
-                cuenta.getUsuario().getCedula(),
-                cuenta.getUsuario().getNombre(),
-                cuenta.getUsuario().getTelefono(),
-                cuenta.getUsuario().getDireccion(),
+                cuenta.getCedula(),
+                cuenta.getNombre(),
+                cuenta.getTelefono(),
                 cuenta.getEmail()
         );
     }
@@ -331,7 +320,6 @@ public class CuentaServiceImp implements CuentaService {
         cuentaRepository.save(cuenta);
     }
 
-
     @Override
     public TokenDTO iniciarSesion(LoginDTO loginDTO)  throws CuentaException {
         // Buscar la cuenta por email electrónico
@@ -358,9 +346,8 @@ public class CuentaServiceImp implements CuentaService {
     public Map<String, Object> construirClaims(Cuenta cuenta) {
         return Map.of(
                 "rol", cuenta.getRol(),
-                "nombre", cuenta.getUsuario().getNombre(),
+                "nombre", cuenta.getNombre(),
                 "id", cuenta.getId()
         );
     }
-
 }

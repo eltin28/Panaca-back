@@ -18,7 +18,7 @@ public class Pago {
     @EqualsAndHashCode.Include
     private String id;
 
-    private LocalDateTime fecha;
+    private LocalDateTime fecha; //Fecha del pago
     private String estado;
     private String detalleEstado;
     private String tipoPago;

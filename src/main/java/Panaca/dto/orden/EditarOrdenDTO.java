@@ -10,11 +10,9 @@ public record EditarOrdenDTO (
         @NotNull(message = "Usuario no encontrado")
         String id,
 
-        String idCupon,  // Este campo puede ser nulo si no se usa un cupón
+        String codigoCupon,  // Este campo puede ser nulo si no se usa un cupón
 
-        @NotNull(message = "El total de la orden es obligatorio.")
-        @Size(min = 1, message = "El total debe ser mayor a 0.")
-        float total
-
-    ){
-}
+        @NotNull(message = "La lista de detalles es obligatoria.")
+        @Size(min = 1, message = "Debe contener al menos un ítem.")
+        List<DetalleOrdenDTO> detalleOrden
+){}

@@ -17,10 +17,8 @@ public record CrearCuentaDTO(
 
         @NotBlank(message = "El teléfono es requerido")
         @Length(max = 10, message = "El teléfono debe tener un máximo de 10 caracteres")
+        @Pattern(regexp = "\\d{10}", message = "El teléfono debe contener solo números")
         String telefono,
-
-        @Length(max = 100, message = "La dirección debe tener un máximo de 100 caracteres")
-        String direccion,
 
         @NotBlank(message = "El email es requerido")
         @Length(max = 50, message = "El email debe tener un máximo de 50 caracteres")

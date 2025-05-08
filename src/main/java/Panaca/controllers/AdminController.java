@@ -3,10 +3,7 @@ package Panaca.controllers;
 import Panaca.dto.PQR.InformacionPQRDTO;
 import Panaca.dto.PQR.ResponderPQRDTO;
 import Panaca.dto.autenticacion.MensajeDTO;
-import Panaca.dto.cupon.CrearCuponDTO;
-import Panaca.dto.cupon.EditarCuponDTO;
-import Panaca.dto.cupon.InformacionCuponDTO;
-import Panaca.dto.cupon.ItemsCuponDTO;
+import Panaca.dto.cupon.*;
 import Panaca.dto.evento.CrearEventoDTO;
 import Panaca.dto.evento.EditarEventoDTO;
 import Panaca.dto.evento.ItemEventoDTO;
@@ -17,7 +14,6 @@ import Panaca.model.documents.Cupon;
 import Panaca.service.service.CuponService;
 import Panaca.service.service.EventoService;
 import Panaca.service.service.ImagesService;
-import Panaca.dto.evento.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +42,8 @@ public class AdminController {
     @Autowired
     Panaca.service.service.PQRService PQRService;
 
+    //==================================== METODOS EVENTO =============================================//
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/crear-evento")
     public ResponseEntity<MensajeDTO<String>> crearEvento(@Valid @RequestBody CrearEventoDTO eventoDTO) throws EventoException {
         try {
@@ -54,9 +53,9 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar-evento/{id}")
-    public ResponseEntity<MensajeDTO> editarEvento(@PathVariable("id") String id, @Valid @RequestBody EditarEventoDTO eventoDTO) throws EventoException {
+    public ResponseEntity<MensajeDTO<String>> editarEvento(@PathVariable("id") String id, @Valid @RequestBody EditarEventoDTO eventoDTO) throws EventoException {
         try{
             eventoService.editarEvento(id,eventoDTO);
             return ResponseEntity.ok(new MensajeDTO<>(true, "Evento modificado exitosamente"));
@@ -64,7 +63,7 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
             }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/eliminar-evento/{id}")
     public ResponseEntity<MensajeDTO<String>> eliminarEvento(@Valid @PathVariable String id) throws EventoException {
         try{
@@ -74,7 +73,7 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/evento-activos")
     public ResponseEntity<Page<ItemEventoDTO>> getEventosActivos(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "3") int size){
@@ -82,7 +81,7 @@ public class AdminController {
         Page<ItemEventoDTO> eventos = eventoService.getEventoActivos(pageRequest);
         return ResponseEntity.ok(eventos);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/evento-inactivos")
     public ResponseEntity<Page<ItemEventoDTO>> getEventosInactivos(@RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "3") int size){
@@ -92,12 +91,6 @@ public class AdminController {
 
     }
 
-//    @GetMapping("/obtener-localidad/{nombre}")
-//    public ResponseEntity<MensajeDTO<Localidad>> obtenerLocalidad(@Valid @PathVariable String nombre) throws EventoException {
-//        Localidad info = eventoService.obtenerLocalidadPorNombre(nombre);
-//        return ResponseEntity.ok(new MensajeDTO<>(true, info ));
-//    }
-
     //==================================== METODOS PQR =============================================//
 
     /**
@@ -105,6 +98,7 @@ public class AdminController {
      * @param responderPQRDTO Datos de respuesta a la PQR.
      * @return Mensaje de éxito.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/responder-pqr")
     public ResponseEntity<MensajeDTO<String>> responderPQR(@Valid @RequestBody ResponderPQRDTO responderPQRDTO) {
         try {
@@ -120,7 +114,8 @@ public class AdminController {
      * @param id ID de la PQR.
      * @return Información de la PQR.
      */
-    @GetMapping("/obterner-informacion-pqr/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/obtener-informacion-pqr/{id}")
     public ResponseEntity<MensajeDTO<InformacionPQRDTO>> obtenerInformacionPQR(@Valid @PathVariable String id) throws PQRException {
         InformacionPQRDTO informacionPQRDTO = PQRService.obtenerInformacionPQR(id);
         return ResponseEntity.ok(new MensajeDTO<>(true, informacionPQRDTO));
@@ -131,6 +126,7 @@ public class AdminController {
      * @param id ID de la PQR a eliminar.
      * @return Mensaje de éxito.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/eliminar-pqr/{id}")
     public ResponseEntity<MensajeDTO<String>> eliminarPQR(@Valid @PathVariable String id) {
         try {
@@ -143,6 +139,7 @@ public class AdminController {
 
     //====================================== METODOS CUPON ====================================//
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/crear-cupon")
     public ResponseEntity<MensajeDTO<String>> crearCupon(@Valid @RequestBody CrearCuponDTO cuponDTO) throws CuponException {
         try {
@@ -153,6 +150,7 @@ public class AdminController {
             }
         }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar-cupon/{cuponId}")
     public ResponseEntity<MensajeDTO<String>> editarCupon(@Valid @RequestBody EditarCuponDTO cupon, @PathVariable String cuponId) throws CuponException {
         try {
@@ -163,6 +161,7 @@ public class AdminController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/eliminar-cupon/{id}")
     public ResponseEntity<MensajeDTO<String>> eliminarCupon(@PathVariable String id) throws CuponException {
         try {
@@ -173,13 +172,15 @@ public class AdminController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/cupon/{id}")
     public ResponseEntity<InformacionCuponDTO> obtenerInformacionCupon(@PathVariable String id) throws CuponException {
         InformacionCuponDTO cuponInfo = cuponService.obtenerInformacionCupon(id);
         return ResponseEntity.ok(cuponInfo);
     }
 
-    @GetMapping("/cupones-disponibles")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/cupones?estado=DISPONIBLE")
     public ResponseEntity<Page<Cupon>> getAllDisponibles(@RequestParam(defaultValue = "0") int page,
                                                          @RequestParam(defaultValue = "4") int size){
         PageRequest pageRequest= PageRequest.of(page, size);
@@ -187,7 +188,8 @@ public class AdminController {
         return ResponseEntity.ok(cupones);
     }
 
-    @GetMapping("/cupones-no-disponibles")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/cupones?estado=NO_DISPONIBLE")
     public ResponseEntity<Page<Cupon>> getAllNoDisponibles(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "4") int size){
         PageRequest pageRequest= PageRequest.of(page, size);
@@ -195,20 +197,23 @@ public class AdminController {
         return ResponseEntity.ok(cupones);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/filtrar-cupones")
-    public ResponseEntity<List<ItemsCuponDTO>> obtenerCuponesFiltrados(@RequestBody ItemsCuponDTO itemCuponDTO) {
-        List<ItemsCuponDTO> cuponesFiltrados = cuponService.obtenerCuponesFiltrados(itemCuponDTO);
+    public ResponseEntity<List<ItemsCuponDTO>> obtenerCuponesFiltrados(@RequestBody ItemsCuponFiltroDTO filtro) {
+        List<ItemsCuponDTO> cuponesFiltrados = cuponService.obtenerCuponesFiltrados(filtro);
         return ResponseEntity.ok(cuponesFiltrados);
     }
 
     //=========================================== METODOS IMAGENES ===============================================//
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/subir")
     public ResponseEntity<MensajeDTO<String>> subir(@RequestParam("imagen") MultipartFile imagen) throws Exception {
         String respuesta = imagesService.subirImagen(imagen);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, respuesta));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/eliminar/{idImagen}")
     public ResponseEntity<MensajeDTO<String>> eliminar(@PathVariable String idImagen)  throws Exception{
         try {
@@ -218,8 +223,4 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
-
-
-
-
 }

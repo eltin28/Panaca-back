@@ -8,7 +8,6 @@ import Panaca.model.documents.Cuenta;
 import Panaca.model.documents.PQR;
 import Panaca.model.enums.EstadoPQR;
 import Panaca.service.service.PQRService;
-import Panaca.dto.PQR.*;
 import Panaca.exceptions.PQRException;
 import Panaca.repository.CuentaRepository;
 import Panaca.repository.PQRRepository;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,37 +39,32 @@ public class PQRServiceImp implements PQRService {
 
             pqrRepository.save(pqr);
         } catch (Exception e) {
-            throw new PQRException("Error creando la PQR: " + e.getMessage());
+            throw new PQRException("Error creando la PQR: " + e);
         }
     }
 
     @Override
     public void eliminarPQR(String id) throws PQRException {
-        Optional<PQR> pqrOpt = pqrRepository.findById(id);
-        if (pqrOpt.isEmpty()) {
-            throw new PQRException("PQR no encontrada");
-        }
-        pqrRepository.deleteById(id);
+        PQR pqr = pqrRepository.findById(id)
+                .orElseThrow(() -> new PQRException("PQR no encontrada"));
+
+        pqr.setEstadoPQR(EstadoPQR.ELIMINADO);
+        pqrRepository.save(pqr);
     }
 
     @Override
     public InformacionPQRDTO obtenerInformacionPQR(String id) throws PQRException {
-        Optional<PQR> pqrOpt = pqrRepository.findById(id);
-        if (pqrOpt.isEmpty()) {
-            throw new PQRException("PQR no encontrada");
-        }
-
-        PQR pqr = pqrOpt.get();
+        PQR pqr = pqrRepository.findById(id)
+                .orElseThrow(() -> new PQRException("PQR no encontrada"));
 
         Cuenta cuenta = cuentaRepository.findById(pqr.getIdUsuario())
-                .orElseThrow(() -> new PQRException("Usuario no encontrado"));
+                .orElseThrow(() -> new PQRException("Usuario no encontrado para la PQR"));
 
         return new InformacionPQRDTO(
                 pqr.getId(),
-                cuenta.getUsuario().getNombre(),
-                cuenta.getUsuario().getTelefono(),
+                cuenta.getNombre(),
+                cuenta.getTelefono(),
                 cuenta.getEmail(),
-                cuenta.getUsuario().getDireccion(),
                 pqr.getFechaCreacion(),
                 pqr.getEstadoPQR(),
                 pqr.getCategoriaPQR(),
@@ -81,28 +74,19 @@ public class PQRServiceImp implements PQRService {
         );
     }
 
-
     @Override
     public List<PQR> obtenerPQRsPorUsuario(String idUsuario) throws PQRException {
-        try {
-            List<PQR> pqrs = pqrRepository.findByIdUsuario(idUsuario);
-            if (pqrs.isEmpty()) {
-                throw new PQRException("No se encontraron PQRs para este usuario");
-            }
-            return pqrs;
-        } catch (Exception e) {
-            throw new PQRException("Error obteniendo las PQRs: " + e.getMessage());
+        List<PQR> pqrs = pqrRepository.findByIdUsuario(idUsuario);
+        if (pqrs.isEmpty()) {
+            throw new PQRException("No se encontraron PQRs para el usuario con ID: " + idUsuario);
         }
+        return pqrs;
     }
 
     @Override
     public void responderPQR(ResponderPQRDTO responderPqrDTO) throws PQRException {
-        Optional<PQR> pqrOpt = pqrRepository.findById(responderPqrDTO.id());
-        if (pqrOpt.isEmpty()) {
-            throw new PQRException("PQR no encontrada");
-        }
-
-        PQR pqr = pqrOpt.get();
+        PQR pqr = pqrRepository.findById(responderPqrDTO.id())
+                .orElseThrow(() -> new PQRException("PQR no encontrada"));
 
         if (pqr.getEstadoPQR() == EstadoPQR.RESUELTO) {
             throw new PQRException("La PQR ya ha sido resuelta");
@@ -117,17 +101,19 @@ public class PQRServiceImp implements PQRService {
 
     @Override
     public List<ItemPQRDTO> listarPQRs() throws PQRException {
-        try {
-            List<PQR> pqrs = pqrRepository.findAll();
-            return pqrs.stream()
-                    .map(pqr -> new ItemPQRDTO(
-                            pqr.getId(),
-                            pqr.getIdUsuario().toString(),
-                            pqr.getEstadoPQR(),
-                            pqr.getFechaCreacion()
-                    )).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new PQRException("Error listando las PQRs: " + e.getMessage());
+        List<PQR> pqrs = pqrRepository.findAll();
+
+        if (pqrs.isEmpty()) {
+            throw new PQRException("No hay PQRs registradas en el sistema.");
         }
+
+        return pqrs.stream()
+                .map(pqr -> new ItemPQRDTO(
+                        pqr.getId(),
+                        pqr.getIdUsuario(),
+                        pqr.getEstadoPQR(),
+                        pqr.getFechaCreacion()
+                ))
+                .collect(Collectors.toList());
     }
 }

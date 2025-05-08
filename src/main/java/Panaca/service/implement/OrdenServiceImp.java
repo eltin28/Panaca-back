@@ -1,10 +1,8 @@
 package Panaca.service.implement;
 
+import Panaca.configs.MercadoPagoProperties;
 import Panaca.dto.cuenta.InformacionCuentaDTO;
-import Panaca.dto.orden.CrearOrdenDTO;
-import Panaca.dto.orden.DetalleOrdenDTO;
-import Panaca.dto.orden.EditarOrdenDTO;
-import Panaca.dto.orden.MostrarOrdenDTO;
+import Panaca.dto.orden.*;
 import Panaca.exceptions.*;
 import Panaca.model.documents.Carrito;
 import Panaca.model.documents.Cupon;
@@ -12,15 +10,10 @@ import Panaca.model.documents.Evento;
 import Panaca.model.documents.Orden;
 import Panaca.model.vo.DetalleCarrito;
 import Panaca.model.vo.DetalleOrden;
-import Panaca.model.vo.Localidad;
 import Panaca.model.vo.Pago;
 import Panaca.service.service.*;
-import Panaca.exceptions.*;
-import Panaca.model.documents.*;
 import Panaca.repository.CarritoRepository;
-import Panaca.repository.EventoRepository;
 import Panaca.repository.OrdenRepository;
-import Panaca.service.service.*;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
@@ -30,6 +23,7 @@ import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -38,20 +32,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OrdenServiceImp implements OrdenService {
 
     private final OrdenRepository ordenRepository;
     private final EventoService eventoService;
-    private final CarritoService carritoService;
     private final CarritoRepository carritoRepository;
     private final CuentaService cuentaService;
     private final CuponService cuponService;
-    private final EventoRepository eventoRepository;
+    private final MercadoPagoProperties mercadoPagoProperties;
 
     @Override
     public void crearOrdenDesdeCarrito(String idCliente, String codigoCupon, String codigoPasarela) throws OrdenException, CarritoException, CuponException {
@@ -68,20 +63,10 @@ public class OrdenServiceImp implements OrdenService {
         // Convertir los detalles del carrito a detalles de la orden
         List<DetalleOrdenDTO> detallesOrdenDTO = convertirCarritoADetalleOrdenDTO(carrito.getItems());
 
-        // Obtener el evento y la fecha del evento (en este caso, tomamos el primer ítem)
-        DetalleOrdenDTO detalleOrdenDTO = detallesOrdenDTO.get(0);
-        Evento evento = eventoService.obtenerInformacionEvento(detalleOrdenDTO.idEvento());
-
-        if (evento == null) {
-            throw new EventoException("No se encontró el evento con el ID: " + detalleOrdenDTO.idEvento());
-        }
-
-        // Verificar si la compra se realiza al menos dos días antes del evento
-        LocalDate fechaEvento = evento.getFecha(); // Fecha del evento
-        LocalDate fechaLimiteCompra = fechaEvento.minusDays(2); // Fecha límite para comprar entradas
-
-        if (LocalDate.now().isAfter(fechaLimiteCompra)) {
-            throw new OrdenException("Las entradas solo pueden ser compradas hasta dos días antes del evento.");
+        for (DetalleOrdenDTO detalle : detallesOrdenDTO) {
+            if (detalle.fechaUso().isBefore(LocalDate.now())) {
+                throw new OrdenException("La fecha de uso no puede estar en el pasado para el evento: " + detalle.idEvento());
+            }
         }
 
         // Calcular el total de la orden
@@ -100,56 +85,15 @@ public class OrdenServiceImp implements OrdenService {
         crearOrden(ordenDTO, totalOrden);
     }
 
-    // Método para reducir las entradas disponibles en las localidades
-    private void reducirEntradasEnLocalidades(List<DetalleOrdenDTO> detallesOrdenDTO) throws OrdenException {
-        for (DetalleOrdenDTO detalle : detallesOrdenDTO) {
-            // Obtener el evento
-            Evento evento = eventoService.obtenerInformacionEvento(detalle.idEvento());
-
-            // Encontrar la localidad dentro del evento
-            Localidad localidad = evento.getLocalidades().stream()
-                    .filter(loc -> loc.getNombre().equals(detalle.nombreLocalidad()))
-                    .findFirst()
-                    .orElseThrow(() -> new EventoException("No se encontró la localidad: " + detalle.nombreLocalidad()));
-
-            // Verificar si hay suficientes entradas en la localidad
-            if (localidad.getCapacidadMaxima() < detalle.cantidad()) {
-                throw new OrdenException("No hay suficientes entradas disponibles para la localidad: " + detalle.nombreLocalidad());
-            }
-
-            // Restar las entradas
-            localidad.setCapacidadMaxima(localidad.getCapacidadMaxima() - detalle.cantidad());
-
-            // Guardar el evento actualizado
-            eventoRepository.save(evento);
-        }
-    }
-
-
-
     // Convierte los ítems del carrito a DetalleOrdenDTO
     private List<DetalleOrdenDTO> convertirCarritoADetalleOrdenDTO(List<DetalleCarrito> itemsCarrito) {
-        return itemsCarrito.stream().map(item -> {
-            // Obtener el evento
-            Evento evento = eventoService.obtenerInformacionEvento(item.getIdEvento().toString());
-            if (evento == null) {
-                throw new EventoException("No se encontró el evento con el ID: " + item.getIdEvento());
-            }
-
-            // Buscar la localidad por nombre
-            Localidad localidad = evento.getLocalidades().stream()
-                    .filter(loc -> loc.getNombre().equals(item.getNombreLocalidad()))
-                    .findFirst()
-                    .orElseThrow(() -> new EventoException("No se encontró la localidad: " + item.getNombreLocalidad()));
-
-            // Retornar DetalleOrdenDTO con el precio de la localidad
-            return new DetalleOrdenDTO(
-                    item.getIdEvento().toString(),
-                    item.getNombreLocalidad(),
-                    item.getCantidad(),
-                    localidad.getPrecio() // Aquí obtenemos el precio de la localidad
-            );
-        }).collect(Collectors.toList());
+        return itemsCarrito.stream()
+                .map(item -> new DetalleOrdenDTO(
+                        item.getIdEvento(),
+                        item.getCantidad(),
+                        item.getFechaUso()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -183,55 +127,50 @@ public class OrdenServiceImp implements OrdenService {
         return detalleOrdenDTO.stream()
                 .map(dto -> new DetalleOrden(
                         new ObjectId(dto.idEvento()),
-                        dto.nombreLocalidad(),
                         dto.cantidad(),
-                        dto.precio()
+                        dto.fechaUso()
                         ))
                 .collect(Collectors.toList());
     }
 
     @Override
     public MostrarOrdenDTO mostrarOrden(String idOrden) throws OrdenException, CuentaException {
-        // Obtener la orden de la base de datos
         Orden orden = obtenerOrdenPorId(idOrden);
-
-        // Obtener información del usuario
         InformacionCuentaDTO usuario = cuentaService.obtenerInformacionCuenta(orden.getIdCliente().toString());
 
-        // Obtener información del evento
-        DetalleOrden detalle = orden.getDetalle().get(0); // Asumiendo que hay al menos un detalle en la orden
-        Evento evento = eventoService.obtenerInformacionEvento(detalle.getIdEvento().toString());
+        List<MostrarDetalleOrdenDTO> detalles = new ArrayList<>();
 
+        for (DetalleOrden detalle : orden.getDetalle()) {
+            Evento evento = eventoService.obtenerInformacionEvento(detalle.getIdEvento().toString());
+            detalles.add(new MostrarDetalleOrdenDTO(
+                    evento.getId(),
+                    evento.getNombre(),
+                    evento.getTipo(),
+                    detalle.getFechaUso(),
+                    evento.getPrecio(),
+                    detalle.getCantidad()
+            ));
+        }
 
-        // Crear el DTO MostrarOrdenDTO
         return new MostrarOrdenDTO(
-                usuario.id(),
                 usuario.nombre(),
-                evento.getId(),
-                evento.getNombre(),
                 orden.getFecha(),
-                evento.getFecha(),
-                evento.getTipo(),
-                detalle.getNombreLocalidad(),
-                detalle.getPrecio(),
-                detalle.getCantidad(),
-                orden.getCodigoCupon() != null ? orden.getCodigoCupon() : null,
-                orden.getTotal()
+                orden.getCodigoCupon(),
+                orden.getTotal(),
+                detalles
         );
     }
 
     private double calcularTotalOrden(List<DetalleOrdenDTO> detallesOrdenDTO, String codigoCupon, LocalDateTime fechaCompra) throws CuponException {
-        // Calcular el total de los detalles
-        double total = detallesOrdenDTO.stream()
-                .mapToDouble(detalle -> detalle.precio() * detalle.cantidad())
-                .sum();
+        double total = 0.0;
 
-        // Aplicar el cupón si existe
+        for (DetalleOrdenDTO detalle : detallesOrdenDTO) {
+            Evento evento = eventoService.obtenerInformacionEvento(detalle.idEvento());
+            total += evento.getPrecio() * detalle.cantidad();
+        }
+
         if (codigoCupon != null && !codigoCupon.isEmpty()) {
-            // Llama a cuponService para validar y aplicar el cupón
             Cupon cupon = cuponService.aplicarCupon(codigoCupon, fechaCompra);
-
-            // Restar el descuento del cupón al total
             double descuento = total * (cupon.getDescuento() / 100.0);
             total -= descuento;
         }
@@ -239,91 +178,75 @@ public class OrdenServiceImp implements OrdenService {
         return total;
     }
 
+
     // Obtener una orden por ID
     @Override
     public Orden obtenerOrdenPorId(String id) throws OrdenException {
         return ordenRepository.findById(id).orElseThrow(() -> new OrdenException("Orden no encontrada"));
     }
 
-    // Actualizar una orden existente
-    public void actualizarOrden(String id, EditarOrdenDTO ordenDTO) throws OrdenException {
-
-        //Buscamos la orden del usuario que se quiere actualizar
+    @Override
+    public void actualizarOrden(String id, EditarOrdenDTO ordenDTO) throws OrdenException, CuponException {
         Orden orden = obtenerOrdenPorId(id);
 
-        //Si no se encontró la cuenta del usuario, lanzamos una excepción
-        if(orden == null){
+        if (orden == null) {
             throw new OrdenException("No existe una orden con el id dado");
         }
 
-        orden.setCodigoCupon(ordenDTO.idCupon());
-        orden.setTotal(ordenDTO.total());
+        orden.setCodigoCupon(ordenDTO.codigoCupon());
+
+        // Convertir los nuevos detalles y establecerlos
+        List<DetalleOrden> nuevosDetalles = convertirDetalleDTOADetalle(ordenDTO.detalleOrden());
+        orden.setDetalle(nuevosDetalles);
+
+        // Recalcular total con los nuevos detalles
+        double total = calcularTotalOrden(ordenDTO.detalleOrden(), ordenDTO.codigoCupon(), LocalDateTime.now());
+        orden.setTotal(total);
 
         ordenRepository.save(orden);
     }
 
-    // Eliminar una orden
     @Override
     public void eliminarOrden(String id) throws OrdenException {
+        Optional<Orden> optionalOrden = ordenRepository.findById(id);
 
-        //Buscamos la cuenta del usuario que se quiere eliminar
-        Orden orden = obtenerOrdenPorId(id);
-
-        //Si no se encontró la cuenta, lanzamos una excepción
-        if(orden == null){
-            throw new OrdenException("No se encontró la orden con el id "+id);
+        if (optionalOrden.isEmpty()) {
+            throw new OrdenException("No se encontró la orden con el ID: " + id);
         }
 
-        ordenRepository.delete(orden);
+        ordenRepository.delete(optionalOrden.get());
     }
 
     @Override
     public Preference realizarPago(String idOrden) throws Exception {
-
-        // Obtener la orden guardada en la base de datos y los ítems de la orden
         Orden ordenGuardada = obtenerOrdenPorId(idOrden);
         List<PreferenceItemRequest> itemsPasarela = new ArrayList<>();
 
-        // Recorrer los items de la orden y crea los ítems de la pasarela
-        for(DetalleOrden item : ordenGuardada.getDetalle()){
-
-            // Obtener el evento y la localidad del ítem
+        for (DetalleOrden item : ordenGuardada.getDetalle()) {
             Evento evento = eventoService.obtenerInformacionEvento(item.getIdEvento().toString());
 
-            // Usar directamente el precio y el nombre de localidad desde el detalle de la orden
-            Float precioLocalidad = item.getPrecio();  // Aquí asumimos que el precio está en el detalle
-            String nombreLocalidad = item.getNombreLocalidad();
-
-            // Crear el item de la pasarela
-            PreferenceItemRequest itemRequest =
-                    PreferenceItemRequest.builder()
-                            .id(evento.getId())
-                            .title(evento.getNombre())
-                            .pictureUrl(evento.getImagenPortada())
-                            .categoryId(evento.getTipo().name())
-                            .quantity(item.getCantidad())
-                            .currencyId("COP")
-                            .unitPrice(BigDecimal.valueOf(precioLocalidad))
-                            .build();
-
+            PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
+                    .id(evento.getId())
+                    .title(evento.getNombre())
+                    .pictureUrl(evento.getImagenPortada())
+                    .categoryId(evento.getTipo().name())
+                    .quantity(item.getCantidad())
+                    .currencyId("COP")
+                    .unitPrice(BigDecimal.valueOf(evento.getPrecio()))
+                    .build();
 
             itemsPasarela.add(itemRequest);
         }
 
+        // token desde config
+        MercadoPagoConfig.setAccessToken(mercadoPagoProperties.getToken());
 
-        // Configurar las credenciales de MercadoPago
-        MercadoPagoConfig.setAccessToken("APP_USR-4123262776745313-100812-965fcccac0cb0fd91a2368b9d8c3689f-2027268786");
-
-
-        // Configurar las urls de retorno de la pasarela (Frontend)
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success("URL PAGO EXITOSO")
-                .failure("URL PAGO FALLIDO")
-                .pending("URL PAGO PENDIENTE")
+                .success("https://tusitio.com/pago/exito")
+                .failure("https://tusitio.com/pago/fallo")
+                .pending("https://tusitio.com/pago/pendiente")
                 .build();
 
-
-        // Construir la preferencia de la pasarela con los ítems, metadatos y urls de retorno
         PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                 .backUrls(backUrls)
                 .items(itemsPasarela)
@@ -331,16 +254,11 @@ public class OrdenServiceImp implements OrdenService {
                 .notificationUrl("https://de93-2800-e2-9880-a18-6405-c7c4-bed9-4dde.ngrok-free.app")
                 .build();
 
-
-        // Crear la preferencia en la pasarela de MercadoPago
         PreferenceClient client = new PreferenceClient();
         Preference preference = client.create(preferenceRequest);
 
-
-        // Guardar el código de la pasarela en la orden
-        ordenGuardada.setCodigoPasarela( preference.getId() );
+        ordenGuardada.setCodigoPasarela(preference.getId());
         ordenRepository.save(ordenGuardada);
-
 
         return preference;
     }
@@ -348,44 +266,46 @@ public class OrdenServiceImp implements OrdenService {
     @Override
     public void recibirNotificacionMercadoPago(Map<String, Object> request) {
         try {
+            if (!"payment".equals(request.get("type"))) return;
 
-            // Obtener el tipo de notificación
-            Object tipo = request.get("type");
-
-
-            // Si la notificación es de un pago entonces obtener el pago y la orden asociada
-            if ("payment".equals(tipo)) {
-
-
-                // Capturamos el JSON que viene en el request y lo convertimos a un String
-                String input = request.get("data").toString();
-
-
-                // Extraemos los números de la cadena, es decir, el id del pago
-                String idPago = input.replaceAll("\\D+", "");
-
-
-                // Se crea el cliente de MercadoPago y se obtiene el pago con el id
-                PaymentClient client = new PaymentClient();
-                Payment payment = client.get( Long.parseLong(idPago) );
-
-
-                // Obtener el id de la orden asociada al pago que viene en los metadatos
-                String idOrden = payment.getMetadata().get("id_orden").toString();
-
-
-                // Se obtiene la orden guardada en la base de datos y se le asigna el pago
-                Orden orden = obtenerOrdenPorId(idOrden);
-                Pago pago = crearPago(payment);
-                orden.setPago(pago);
-                ordenRepository.save(orden);
+            // Validar existencia del campo "data"
+            Object data = request.get("data");
+            if (!(data instanceof Map)) {
+                throw new IllegalArgumentException("Notificación inválida: 'data' no encontrada o malformada.");
             }
 
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dataMap = (Map<String, Object>) data;
+
+            Object idPagoObj = dataMap.get("id");
+            if (idPagoObj == null) {
+                throw new IllegalArgumentException("Notificación inválida: ID de pago no presente.");
+            }
+
+            long idPago = Long.parseLong(idPagoObj.toString());
+
+            PaymentClient client = new PaymentClient();
+            Payment payment = client.get(idPago);
+
+            // Extraer ID de la orden desde metadata
+            Object idOrdenObj = payment.getMetadata().get("id_orden");
+            if (idOrdenObj == null) {
+                throw new IllegalArgumentException("El pago no tiene ID de orden en los metadatos.");
+            }
+
+            String idOrden = idOrdenObj.toString();
+
+            // Guardar el pago en la orden
+            Orden orden = obtenerOrdenPorId(idOrden);
+            Pago pago = crearPago(payment);
+            orden.setPago(pago);
+            ordenRepository.save(orden);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error al procesar notificación de MercadoPago: {}", e.getMessage(), e);
         }
     }
+
     private Pago crearPago(Payment payment) {
         Pago pago = new Pago();
         pago.setId(payment.getId().toString());

@@ -2,6 +2,7 @@ package Panaca.dto.cuenta;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
 public record EditarCuentaDTO(
@@ -15,13 +16,9 @@ public record EditarCuentaDTO(
 
         @NotBlank(message = "El teléfono es requerido")
         @Length(min= 10, max = 10, message = "El teléfono debe tener un máximo de 10 caracteres")
+        @Pattern(regexp = "\\d{10}", message = "El teléfono debe contener solo números")
         String telefono,
 
-        @NotBlank(message = "La dirreccion es requerida")
-        @Length(max = 100, message = "La dirección debe tener un máximo de 100 caracteres")
-        String direccion,
-
-        //@NotBlank(message = "La contraseña es requerida")
         @Length(min = 7, max = 20, message = "La contraseña debe tener un mínimo de 7 caracteres y un máximo de 20 caracteres")
         String password
 ) {

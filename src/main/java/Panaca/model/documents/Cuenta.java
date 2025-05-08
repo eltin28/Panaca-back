@@ -3,7 +3,6 @@ package Panaca.model.documents;
 
 import Panaca.model.enums.EstadoCuenta;
 import Panaca.model.enums.Rol;
-import Panaca.model.vo.Usuario;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,7 +22,9 @@ public class Cuenta {
     @EqualsAndHashCode.Include
     private String id;
 
-    private Usuario usuario;
+    private String cedula;
+    private String nombre;
+    private String telefono;
     private String email;
     private String password;
     private String codigoVerificacionRegistro;
@@ -35,8 +36,10 @@ public class Cuenta {
     private EstadoCuenta estado;
 
     @Builder
-    public Cuenta(Usuario usuario, String email, String password, String codigoVerificacion, String codigoVerificacionContrasenia, LocalDateTime fechaRegistro, Rol rol, EstadoCuenta estado) {
-        this.usuario = usuario;
+    public Cuenta(String cedula, String nombre, String telefono, String email, String password, String codigoVerificacion, String codigoVerificacionContrasenia, LocalDateTime fechaRegistro, Rol rol, EstadoCuenta estado) {
+        this.cedula = cedula;
+        this.nombre = nombre;
+        this.telefono = telefono;
         this.email = email;
         this.password = password;
         this.codigoVerificacionRegistro = codigoVerificacion;

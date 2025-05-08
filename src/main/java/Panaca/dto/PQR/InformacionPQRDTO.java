@@ -10,12 +10,10 @@ public record InformacionPQRDTO(
         String nombreUsuario,
         String telefonoUsuario,
         String emailUsuario,
-        String direccionUsuario,
         LocalDateTime fechaCreacion,
         EstadoPQR estadoPQR,
         CategoriaPQR categoriaPQR,
         String descripcion,
         String respuesta,
         LocalDateTime fechaRespuesta
-) {
-}
+) {}

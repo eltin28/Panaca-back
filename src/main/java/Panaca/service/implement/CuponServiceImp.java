@@ -1,9 +1,6 @@
 package Panaca.service.implement;
 
-import Panaca.dto.cupon.CrearCuponDTO;
-import Panaca.dto.cupon.EditarCuponDTO;
-import Panaca.dto.cupon.InformacionCuponDTO;
-import Panaca.dto.cupon.ItemsCuponDTO;
+import Panaca.dto.cupon.*;
 import Panaca.model.documents.Cupon;
 import Panaca.model.enums.EstadoCupon;
 import Panaca.model.enums.TipoCupon;
@@ -11,14 +8,15 @@ import Panaca.service.service.CuponService;
 import Panaca.exceptions.CuponException;
 import Panaca.repository.CuponRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,8 +26,6 @@ import java.util.stream.Collectors;
 public class CuponServiceImp implements CuponService {
 
     private final CuponRepository cuponRepository;
-
-    @Autowired
     private MongoTemplate mongoTemplate;
 
     @Override
@@ -126,39 +122,49 @@ public class CuponServiceImp implements CuponService {
     }
 
     @Override
-    public List<ItemsCuponDTO> obtenerCuponesFiltrados(ItemsCuponDTO itemCuponDTO) {
-        List<Cupon> cuponesFiltrados = cuponRepository.findAll();
+    public List<ItemsCuponDTO> obtenerCuponesFiltrados(ItemsCuponFiltroDTO filtro) {
+        List<Criteria> criterios = new ArrayList<>();
 
-        String nombre = itemCuponDTO.nombre();
-        cuponesFiltrados = cuponRepository.findByNombreContainingIgnoreCase(nombre);
+        if (filtro.nombre() != null && !filtro.nombre().isBlank()) {
+            criterios.add(Criteria.where("nombre").regex(filtro.nombre(), "i"));
+        }
 
-        LocalDate fechaVencimiento = itemCuponDTO.fechaVencimiento();
-        cuponesFiltrados = cuponRepository.findByFechaVencimientoAfter(fechaVencimiento);
+        if (filtro.fechaVencimiento() != null) {
+            criterios.add(Criteria.where("fechaVencimiento").gte(filtro.fechaVencimiento()));
+        }
 
-        LocalDate fechaApertura = itemCuponDTO.fechaApertura();
-            cuponesFiltrados = cuponRepository.findByFechaAperturaAfter(fechaApertura);
+        if (filtro.fechaApertura() != null) {
+            criterios.add(Criteria.where("fechaApertura").gt(filtro.fechaApertura()));
+        }
 
-        Float descuento = itemCuponDTO.descuento();
-            cuponesFiltrados = cuponRepository.findByDescuento(descuento);
+        if (filtro.descuento() != null) {
+            criterios.add(Criteria.where("descuento").is(filtro.descuento()));
+        }
 
-        TipoCupon tipo = itemCuponDTO.tipo();
-            cuponesFiltrados = cuponRepository.findByTipo(tipo);
+        if (filtro.tipo() != null) {
+            criterios.add(Criteria.where("tipo").is(filtro.tipo()));
+        }
 
-        EstadoCupon estado = itemCuponDTO.estado();
-        cuponesFiltrados = cuponRepository.findByEstado(estado);
+        if (filtro.estado() != null) {
+            criterios.add(Criteria.where("estado").is(filtro.estado()));
+        }
 
-        // Convertir la lista de Cupon a ItemsCuponDTO
-        List<ItemsCuponDTO> itemsCuponDTO = cuponesFiltrados.stream()
-                .map(cupon -> new ItemsCuponDTO(
-                        cupon.getNombre(),
-                        itemCuponDTO.fechaVencimiento(),
-                        itemCuponDTO.fechaApertura(),
-                        cupon.getDescuento(),
-                        cupon.getTipo(),
-                        cupon.getEstado()))
+        Query query = new Query();
+        if (!criterios.isEmpty()) {
+            query.addCriteria(new Criteria().andOperator(criterios.toArray(new Criteria[0])));
+        }
+
+        List<Cupon> cupones = mongoTemplate.find(query, Cupon.class);
+
+        return cupones.stream()
+                .map(c -> new ItemsCuponDTO(
+                        c.getNombre(),
+                        c.getFechaVencimiento(),
+                        c.getFechaApertura(),
+                        c.getDescuento(),
+                        c.getTipo(),
+                        c.getEstado()))
                 .collect(Collectors.toList());
-
-        return itemsCuponDTO;
     }
 
     @Override
@@ -205,5 +211,4 @@ public class CuponServiceImp implements CuponService {
         }
         return cupon;
     }
-
 }

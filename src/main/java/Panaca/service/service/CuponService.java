@@ -29,9 +29,8 @@ public interface CuponService {
 
     Page<Cupon> getAllNoDisponibles(PageRequest pageRequest);
 
-    List<ItemsCuponDTO> obtenerCuponesFiltrados(ItemsCuponDTO itemCuponDTO);
+    List<ItemsCuponDTO> obtenerCuponesFiltrados(ItemsCuponFiltroDTO filtro);
 
     Cupon aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException;
-    //Aun falta
 
 }

@@ -4,6 +4,7 @@ import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +17,5 @@ public class DetalleCarrito {
 
     private String idEvento;
     private int cantidad;
-    private String nombreLocalidad;
-    private LocalDateTime fechaAgregacion;
-
+    private LocalDate fechaUso;
 }

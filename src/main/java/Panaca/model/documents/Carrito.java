@@ -23,11 +23,5 @@ public class Carrito {
     private String id;
     private String idUsuario;
     private List<DetalleCarrito> items;
-    private LocalDateTime fecha;
 
-    public Carrito(String idUsuario, List<DetalleCarrito> items, LocalDateTime fecha) {
-        this.idUsuario = idUsuario;
-        this.items = items;
-        this.fecha = fecha;
-    }
 }

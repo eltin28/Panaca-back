@@ -1,159 +1,120 @@
 package Panaca.ServiceTest;
 
-import Panaca.dto.cuenta.CrearCuentaDTO;
+import Panaca.configs.JWTUtils;
+import Panaca.dto.autenticacion.TokenDTO;
 import Panaca.dto.cuenta.EditarCuentaDTO;
 import Panaca.dto.cuenta.InformacionCuentaDTO;
-import Panaca.dto.cuenta.ValidarCodigoDTO;
+import Panaca.dto.cuenta.LoginDTO;
 import Panaca.exceptions.CuentaException;
 import Panaca.model.documents.Cuenta;
 import Panaca.model.enums.EstadoCuenta;
-import Panaca.model.vo.Usuario;
+import Panaca.model.enums.Rol;
 import Panaca.repository.CuentaRepository;
 import Panaca.service.implement.CuentaServiceImp;
-import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import Panaca.service.service.CarritoService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class CuentaServiceTest {
+class CuentaServiceTest {
 
-    @Autowired
+    @Mock
     private CuentaRepository cuentaRepository;
-    @Autowired
+
+    @Mock
+    private CarritoService carritoService;
+
+    @Mock
+    private JWTUtils jwtUtils;
+
+    @InjectMocks
     private CuentaServiceImp cuentaService;
 
-    @Test
-    public void actualizarCuentaTest(){
+    private Cuenta cuentaActiva;
+    private Cuenta cuentaInactiva;
 
-        //Se define el id de la cuenta del usuario a actualizar, este id está en el dataset.js
-        String idCuenta = "66a2a9aaa8620e3c1c5437be";
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        cuentaActiva = new Cuenta();
+        cuentaActiva.setId("66a2a9aaa8620e3c1c5437be");
+        cuentaActiva.setCedula("1234567890");
+        cuentaActiva.setNombre("Juan Pérez");
+        cuentaActiva.setTelefono("3001234567");
+        cuentaActiva.setEmail("juan@example.com");
+        cuentaActiva.setPassword("$2a$10$hashedpassword");
+        cuentaActiva.setRol(Rol.CLIENTE);
+        cuentaActiva.setEstado(EstadoCuenta.ACTIVO);
 
-        //Se crea un objeto de tipo EditarCuentaDTO
-        EditarCuentaDTO editarCuentaDTO = new EditarCuentaDTO(
-                idCuenta,
-                "Pepito perez",
-                "12121",
-                "Nueva dirección",
-                "password"
-        );
-
-        assertDoesNotThrow(() -> {
-            //Se actualiza la cuenta del usuario con el id definido
-            cuentaService.editarCuenta(editarCuentaDTO);
-
-            //Obtenemos el detalle de la cuenta del usuario con el id definido
-            InformacionCuentaDTO detalle = cuentaService.obtenerInformacionCuenta(idCuenta);
-
-            //Se verifica que la dirección del usuario sea la actualizada
-            assertEquals("Nueva dirección", detalle.direccion());
-        });
+        cuentaInactiva = new Cuenta();
+        cuentaInactiva.setId("66a2c14dd9219911cd34f2c0");
+        cuentaInactiva.setCedula("1098765432");
+        cuentaInactiva.setNombre("Maria Gomez");
+        cuentaInactiva.setTelefono("3017654321");
+        cuentaInactiva.setEmail("maria@example.com");
+        cuentaInactiva.setPassword("$2a$10$hashedpassword");
+        cuentaInactiva.setRol(Rol.CLIENTE);
+        cuentaInactiva.setEstado(EstadoCuenta.INACTIVO);
     }
 
     @Test
-    public void crearCuentaTest(){
+    void iniciarSesion_exitoso() throws CuentaException {
+        when(cuentaRepository.findByEmail("juan@example.com")).thenReturn(Optional.of(cuentaActiva));
+        when(jwtUtils.generarToken(eq("juan@example.com"), anyMap())).thenReturn("token_mock");
 
-        CrearCuentaDTO cuentaDTO = new CrearCuentaDTO(
-               "25023",
-               "Juan Herrera Hemocho",
-               "3245642384",
-               "igual",
-               "juanH@email.com",
-               "contraseña"
-        );
+        LoginDTO loginDTO = new LoginDTO("juan@example.com", "plaintextPassword");
+        TokenDTO token = cuentaService.iniciarSesion(loginDTO);
 
-        // Primero, verificamos que no se lance ninguna excepción al crear la cuenta
-        assertDoesNotThrow(() -> cuentaService.crearCuenta(cuentaDTO));
+        assertNotNull(token);
+        assertEquals("token_mock", token.token());
     }
 
     @Test
-    public void eliminarCuentaTest() throws CuentaException {
+    void iniciarSesion_cuentaInactiva_lanzaExcepcion() {
+        when(cuentaRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(cuentaInactiva));
+        LoginDTO loginDTO = new LoginDTO("maria@example.com", "password");
 
-        String idCuenta = "66e2f7338a612f6cda3acad2";
-
-        assertDoesNotThrow(() -> cuentaService.eliminarCuenta(idCuenta));
-
+        CuentaException exception = assertThrows(CuentaException.class, () -> cuentaService.iniciarSesion(loginDTO));
+        assertEquals("La cuenta no está activa.", exception.getMessage());
     }
 
     @Test
-    public void validarCodigo_CodigoCorrecto_ActivaCuenta() throws CuentaException {
-        // Crear y guardar una cuenta con un código de verificación
-        Cuenta cuenta = new Cuenta();
-        cuenta.setEmail("test@example.com");
-        cuenta.setCodigoVerificacionRegistro("123456");
-        cuenta.setEstado(EstadoCuenta.INACTIVO);
-        cuentaRepository.save(cuenta);
+    void obtenerInformacionCuenta_devuelveDTO() throws CuentaException {
+        when(cuentaRepository.findById("66a2c14dd9219911cd34f2c0")).thenReturn(Optional.of(cuentaActiva));
+        InformacionCuentaDTO info = cuentaService.obtenerInformacionCuenta("66a2c14dd9219911cd34f2c0");
 
-        // Crear DTO con el email y código correctos
-        ValidarCodigoDTO validarCodigoDTO = new ValidarCodigoDTO("test@example.com", "123456");
-
-        // Ejecutar el método a probar
-        ValidarCodigoDTO resultado = cuentaService.validarCodigo(validarCodigoDTO);
-
-        // Verificaciones
-        assertNotNull(resultado);
-        assertEquals(validarCodigoDTO.email(), resultado.email());
-
-        // Verificar que la cuenta ahora está activa
-        Cuenta cuentaActivada = cuentaRepository.findByEmail(validarCodigoDTO.email()).orElse(null);
-        assertNotNull(cuentaActivada);
-        assertEquals(EstadoCuenta.ACTIVO, cuentaActivada.getEstado());
-        assertNull(cuentaActivada.getCodigoVerificacionRegistro());
+        assertNotNull(info);
+        assertEquals("Juan Pérez", info.nombre());
     }
 
     @Test
-    public void editarCuenta_CuentaExistente_ActualizaDatos() throws CuentaException {
-        // Crear y guardar una cuenta inicial
-        Cuenta cuenta = new Cuenta();
-        cuenta.setEmail("test@example.com");
-        cuenta.setPassword("123456");
-        cuenta.setUsuario(new Usuario("123456789", "Juan Pérez", "3001234567", "Calle 1"));
-        cuentaRepository.save(cuenta);
+    void eliminarCuenta_cambiaEstadoAInactivo() throws CuentaException {
+        when(cuentaRepository.findById("66a2a9aaa8620e3c1c5437be")).thenReturn(Optional.of(cuentaActiva));
 
-        // Crear DTO con los nuevos datos
-        EditarCuentaDTO cuentaEditada = new EditarCuentaDTO(
-                cuenta.getId(), // ID de la cuenta existente
-                "Juan Carlos Pérez", // Nuevo nombre
-                "3007654321", // Nuevo teléfono
-                "Calle 2", // Nueva dirección
-                "nuevaPassword" // Nueva contraseña
-        );
+        cuentaService.eliminarCuenta("66a2a9aaa8620e3c1c5437be");
 
-        // Ejecutar el método a probar
-        cuentaService.editarCuenta(cuentaEditada);
-
-        // Verificar que la cuenta se haya actualizado correctamente
-        Cuenta cuentaModificada = cuentaRepository.findById(cuenta.getId()).orElse(null);
-        assertNotNull(cuentaModificada);
-        assertEquals("Juan Carlos Pérez", cuentaModificada.getUsuario().getNombre());
-        assertEquals("3007654321", cuentaModificada.getUsuario().getTelefono());
-        assertEquals("Calle 2", cuentaModificada.getUsuario().getDireccion());
-        // Verificar que la contraseña esté encriptada
-        assertNotEquals("nuevaPassword", cuentaModificada.getPassword());
+        assertEquals(EstadoCuenta.INACTIVO, cuentaActiva.getEstado());
+        verify(cuentaRepository).save(cuentaActiva);
     }
 
     @Test
-    public void obtenerInformacionCuenta_CuentaExistente_RetornaInformacion() throws CuentaException {
-        // Crear y guardar una cuenta inicial
-        Cuenta cuenta = new Cuenta();
-        cuenta.setEmail("test@example.com");
-        cuenta.setPassword("123456");
-        cuenta.setUsuario(new Usuario("123456789", "Juan Pérez", "3001234567", "Calle 1"));
-        cuentaRepository.save(cuenta);
+    void editarCuenta_modificaNombreTelefonoYPassword() throws CuentaException {
+        when(cuentaRepository.findById("66a2c14dd9219911cd34f2c0")).thenReturn(Optional.of(cuentaActiva));
+        EditarCuentaDTO editarDTO = new EditarCuentaDTO("66a2c14dd9219911cd34f2c0", "Nuevo Nombre", "3210000000", "nuevaPassword");
 
-        // Obtener la información de la cuenta utilizando su ID
-        InformacionCuentaDTO informacionCuenta = cuentaService.obtenerInformacionCuenta(cuenta.getId());
+        cuentaService.editarCuenta(editarDTO);
 
-        // Verificar que se devuelven los datos correctos
-        assertNotNull(informacionCuenta);
-        assertEquals(cuenta.getId(), informacionCuenta.id());
-        assertEquals(cuenta.getUsuario().getCedula(), informacionCuenta.cedula());
-        assertEquals(cuenta.getUsuario().getNombre(), informacionCuenta.nombre());
-        assertEquals(cuenta.getUsuario().getTelefono(), informacionCuenta.telefono());
-        assertEquals(cuenta.getUsuario().getDireccion(), informacionCuenta.direccion());
-        assertEquals(cuenta.getEmail(), informacionCuenta.email());
+        assertEquals("Nuevo Nombre", cuentaActiva.getNombre());
+        assertEquals("3210000000", cuentaActiva.getTelefono());
+        verify(cuentaRepository).save(cuentaActiva);
     }
-
 }

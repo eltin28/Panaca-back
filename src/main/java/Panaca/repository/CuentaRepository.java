@@ -10,6 +10,10 @@ import java.util.Optional;
 public interface CuentaRepository extends MongoRepository<Cuenta, String>{
 
     boolean existsByEmail(String email);
+
+    boolean existsByCedula(String cedula);
+
+
     Optional<Cuenta> findByEmail(String correo);
 
     @Query("{'cedula': ?0}")

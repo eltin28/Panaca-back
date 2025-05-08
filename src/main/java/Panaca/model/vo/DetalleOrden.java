@@ -3,6 +3,8 @@ package Panaca.model.vo;
 import lombok.*;
 import org.bson.types.ObjectId;
 
+import java.time.LocalDate;
+
 @Data
 @Getter
 @Setter
@@ -12,8 +14,6 @@ import org.bson.types.ObjectId;
 public class DetalleOrden {
 
     private ObjectId idEvento;
-    private String nombreLocalidad;
     private int cantidad;
-    private Float precio;
-
+    private LocalDate fechaUso;
 }

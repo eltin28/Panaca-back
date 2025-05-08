@@ -1,17 +1,17 @@
 package Panaca.dto.carrito;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 
-public record ActualizarCarritoDTO(
+public record ActualizarDetalleCarritoDTO(
 
-        @NotBlank(message = "Los items del carrito no puede ser nula ni vacia.")
-        List<DetalleCarritoDTO> items,
+        @Min(value = 1, message = "La cantidad debe ser al menos 1")
+        int cantidad,
 
         @NotNull(message = "La fecha de agregación es obligatoria")
         @PastOrPresent(message = "La fecha de agregación no puede ser en el futuro")
-        LocalDateTime fecha
+        LocalDate fechaUso
 ) {}

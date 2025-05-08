@@ -22,7 +22,7 @@ public interface OrdenService {
 
     Orden obtenerOrdenPorId(String ordenId) throws OrdenException;
 
-    void actualizarOrden (String id, EditarOrdenDTO ordenDTO) throws OrdenException;
+    void actualizarOrden (String id, EditarOrdenDTO ordenDTO) throws OrdenException, CuponException;
 
     void eliminarOrden(String id) throws OrdenException;
 

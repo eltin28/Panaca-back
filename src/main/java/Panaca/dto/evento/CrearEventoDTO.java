@@ -1,38 +1,30 @@
 package Panaca.dto.evento;
 
+import Panaca.model.enums.EstadoEvento;
 import Panaca.model.enums.TipoEvento;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
-import java.util.List;
-
 public record CrearEventoDTO(
+
+        @NotEmpty(message = "El nombre de la boleta es obligatorio.")
+        String nombre,
+
+        @NotEmpty(message = "La descripción de la boleta es obligatoria.")
+        String descripcion,
+
         @NotEmpty(message = "La imagen de portada es obligatoria.")
         String imagenPortada,
 
-        @NotEmpty(message = "La imagen de las localidades es obligatoria.")
-        String imagenLocalidad,
+        @NotNull(message = "El estado de la boleta es obligatoria.")
+        EstadoEvento estado,
 
-        @NotEmpty(message = "El nombre del evento es obligatorio.")
-        String nombre,
+        @NotNull(message = "El tipo de boleta es obligatorio.")
+        TipoEvento tipo,
 
-        @NotEmpty(message = "La descripción del evento es obligatoria.")
-        String descripcion,
+        @DecimalMin(value = "0.0", inclusive = false, message = "El total debe ser mayor a 0.")
+        @NotNull(message = "El precio de la boleta es obligatoria.")
+        Float precio
 
-        @NotEmpty(message = "La dirección del evento es obligatoria.")
-        String direccion,
-
-        @NotNull(message = "El tipo de evento es obligatorio.")
-        TipoEvento tipoEvento,
-
-        @NotNull(message = "La fecha del evento es obligatoria.")
-        LocalDate fecha,
-
-        @NotEmpty(message = "La ciudad es obligatoria.")
-        String ciudad,
-
-        @NotNull(message = "La lista de localidades no puede ser nula.")
-        List<CrearLocalidadDTO> listaLocalidades
-) {
-}
+) {}
