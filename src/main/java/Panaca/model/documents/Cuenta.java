@@ -34,18 +34,4 @@ public class Cuenta {
     private LocalDateTime fechaRegistro;
     private Rol rol;
     private EstadoCuenta estado;
-
-    @Builder
-    public Cuenta(String cedula, String nombre, String telefono, String email, String password, String codigoVerificacion, String codigoVerificacionContrasenia, LocalDateTime fechaRegistro, Rol rol, EstadoCuenta estado) {
-        this.cedula = cedula;
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.email = email;
-        this.password = password;
-        this.codigoVerificacionRegistro = codigoVerificacion;
-        this.codigoVerificacionContrasenia = codigoVerificacionContrasenia;
-        this.fechaRegistro = fechaRegistro;
-        this.rol = rol;
-        this.estado = estado;
-    }
 }

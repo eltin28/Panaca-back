@@ -10,5 +10,4 @@ public record ValidarCodigoDTO(
 
         @NotBlank(message = "El código es requerido")
         String codigo
-) {
-}
+) {}
