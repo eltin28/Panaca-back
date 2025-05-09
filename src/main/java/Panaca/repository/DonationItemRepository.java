@@ -1,6 +1,6 @@
 package Panaca.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import Panaca.model.documents.DonationItem;
+import Panaca.model.documents.Donation;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface DonationItemRepository extends JpaRepository<DonationItem, Long> { }
+public interface DonationItemRepository extends MongoRepository<Donation, String> { }
