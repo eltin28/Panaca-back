@@ -7,6 +7,9 @@ import Panaca.dto.carrito.DetalleCarritoDTO;
 import Panaca.dto.carrito.InformacionEventoCarritoDTO;
 import Panaca.dto.cuenta.EditarCuentaDTO;
 import Panaca.dto.cuenta.InformacionCuentaDTO;
+import Panaca.dto.devolucion.DevolucionRequestDTO;
+import Panaca.dto.devolucion.DevolucionResponseDTO;
+import Panaca.dto.donation.DonationDTO;
 import Panaca.dto.orden.EditarOrdenDTO;
 import Panaca.dto.orden.MostrarOrdenDTO;
 import Panaca.exceptions.*;
@@ -45,6 +48,10 @@ public class CuentaController {
     CarritoService carritoService;
     @Autowired
     OrdenService ordenService;
+    @Autowired
+    DonationService donationService;
+    @Autowired
+    DevolucionService devolucionService;
 
 //==================================== METODOS PERFIL =============================================//
 
@@ -203,4 +210,34 @@ public class CuentaController {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
+
+    //==================================== METODOS DONACIONES =============================================//
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @PostMapping("/donaciones-crear")
+    public ResponseEntity<MensajeDTO<String>> donar(@Valid @RequestBody DonationDTO dto) {
+        donationService.crearDonacion(dto);
+        return ResponseEntity.ok(new MensajeDTO<>(true, "Donación registrada exitosamente"));
+    }
+
+    //==================================== METODOS DEVOLUCIONES =============================================//
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @PostMapping("/devoluciones-solicitar")
+    public ResponseEntity<MensajeDTO<DevolucionResponseDTO>> solicitarDevolucion(
+            @Valid @RequestBody DevolucionRequestDTO dto) {
+        DevolucionResponseDTO response = devolucionService.solicitar(dto);
+        return ResponseEntity.ok(new MensajeDTO<>(true, response));
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/devoluciones-historial")
+    public ResponseEntity<MensajeDTO<List<DevolucionResponseDTO>>> listarDevolucionesUsuario(
+            Authentication authentication) {
+        String cuentaId = AuthUtils.obtenerIdUsuarioDesdeToken(authentication);
+        List<DevolucionResponseDTO> devoluciones = devolucionService.listarPorUsuario(cuentaId);
+        return ResponseEntity.ok(new MensajeDTO<>(true, devoluciones));
+    }
+
+
 }

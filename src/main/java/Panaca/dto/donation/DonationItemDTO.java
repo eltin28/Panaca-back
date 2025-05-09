@@ -1,25 +1,15 @@
 package Panaca.dto.donation;
 
-import Panaca.model.donation.AnimalType;
+import Panaca.model.enums.AnimalType;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
-public class DonationItemDTO {
-    private AnimalType tipoAnimal;
-    private int cantidadBultos;
-    
-    // Getters y Setters
-    public AnimalType getTipoAnimal() {
-        return tipoAnimal;
-    }
+public record DonationItemDTO(
 
-    public void setTipoAnimal(AnimalType tipoAnimal) {
-        this.tipoAnimal = tipoAnimal;
-    }
+        @NotNull(message = "Debe indicar el tipo de animal a donar")
+        AnimalType tipoAnimal,
 
-    public int getCantidadBultos() {
-        return cantidadBultos;
-    }
+        @Min(value = 1, message = "Debe donar al menos un bulto")
+        int cantidadBultos
 
-    public void setCantidadBultos(int cantidadBultos) {
-        this.cantidadBultos = cantidadBultos;
-    }
-}
+) {}

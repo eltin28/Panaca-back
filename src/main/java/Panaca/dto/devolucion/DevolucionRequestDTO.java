@@ -1,31 +1,18 @@
 package Panaca.dto.devolucion;
 
-import Panaca.model.devolucion.TipoDevolucion;
+import Panaca.model.enums.TipoDevolucion;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public class DevolucionRequestDTO {
+public record DevolucionRequestDTO(
 
-    private String cuentaId;         // Antes era Long
-    private TipoDevolucion tipo;
-    private String referenciaId;
+        @NotBlank(message = "El ID de la cuenta es requerido")
+        String cuentaId,
 
-    public String getCuentaId() {
-        return cuentaId;
-    }
-    public void setCuentaId(String cuentaId) {
-        this.cuentaId = cuentaId;
-    }
+        @NotNull(message = "Debe especificar el tipo de devolución")
+        TipoDevolucion tipo,
 
-    public TipoDevolucion getTipo() {
-        return tipo;
-    }
-    public void setTipo(TipoDevolucion tipo) {
-        this.tipo = tipo;
-    }
+        @NotBlank(message = "La referencia de la orden o donación es requerida")
+        String referenciaId
 
-    public String getReferenciaId() {
-        return referenciaId;
-    }
-    public void setReferenciaId(String referenciaId) {
-        this.referenciaId = referenciaId;
-    }
-}
+) {}

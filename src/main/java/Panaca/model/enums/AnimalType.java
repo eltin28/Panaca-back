@@ -1,4 +1,4 @@
-package Panaca.model.donation;
+package Panaca.model.enums;
 
 public enum AnimalType {
     PERRO("Perro", 50_000),

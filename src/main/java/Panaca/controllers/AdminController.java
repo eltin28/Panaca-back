@@ -4,6 +4,7 @@ import Panaca.dto.PQR.InformacionPQRDTO;
 import Panaca.dto.PQR.ResponderPQRDTO;
 import Panaca.dto.autenticacion.MensajeDTO;
 import Panaca.dto.cupon.*;
+import Panaca.dto.devolucion.DevolucionResponseDTO;
 import Panaca.dto.evento.CrearEventoDTO;
 import Panaca.dto.evento.EditarEventoDTO;
 import Panaca.dto.evento.ItemEventoDTO;
@@ -11,9 +12,7 @@ import Panaca.exceptions.CuponException;
 import Panaca.exceptions.EventoException;
 import Panaca.exceptions.PQRException;
 import Panaca.model.documents.Cupon;
-import Panaca.service.service.CuponService;
-import Panaca.service.service.EventoService;
-import Panaca.service.service.ImagesService;
+import Panaca.service.service.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,9 @@ public class AdminController {
     @Autowired
     CuponService cuponService;
     @Autowired
-    Panaca.service.service.PQRService PQRService;
+    PQRService PQRService;
+    @Autowired
+    DevolucionService devolucionService;
 
     //==================================== METODOS EVENTO =============================================//
     @PreAuthorize("hasRole('ADMIN')")
@@ -223,4 +224,28 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
     }
+
+    //==================================== METODOS DEVOLUCIONES =============================================//
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/devoluciones")
+    public ResponseEntity<MensajeDTO<List<DevolucionResponseDTO>>> listarTodasDevoluciones() {
+        List<DevolucionResponseDTO> devoluciones = devolucionService.listarTodas();
+        return ResponseEntity.ok(new MensajeDTO<>(true, devoluciones));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/devoluciones-aprobar/{id}")
+    public ResponseEntity<MensajeDTO<DevolucionResponseDTO>> aprobarDevolucion(@PathVariable String id) {
+        DevolucionResponseDTO dto = devolucionService.aprobar(id);
+        return ResponseEntity.ok(new MensajeDTO<>(true, dto));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/devoluciones-rechazar/{id}")
+    public ResponseEntity<MensajeDTO<DevolucionResponseDTO>> rechazarDevolucion(@PathVariable String id) {
+        DevolucionResponseDTO dto = devolucionService.rechazar(id);
+        return ResponseEntity.ok(new MensajeDTO<>(true, dto));
+    }
+
 }

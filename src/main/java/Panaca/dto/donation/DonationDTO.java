@@ -1,25 +1,18 @@
 package Panaca.dto.donation;
 
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+
 import java.util.List;
 
-public class DonationDTO {
-    private String donanteId;
-    private List<DonationItemDTO> items;
-    
-    // Getters y Setters
-    public String getDonanteId() {
-        return donanteId;
-    }
+public record DonationDTO(
 
-    public void setDonanteId(String donanteId) {
-        this.donanteId = donanteId;
-    }
+        @NotBlank(message = "El ID del donante es requerido")
+        String donanteId,
 
-    public List<DonationItemDTO> getItems() {
-        return items;
-    }
+        @NotEmpty(message = "Debe incluir al menos un ítem en la donación")
+        List<@Valid DonationItemDTO> items
 
-    public void setItems(List<DonationItemDTO> items) {
-        this.items = items;
-    }
-}
+) {}
