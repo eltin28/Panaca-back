@@ -36,5 +36,4 @@ public record CrearCuponDTO (
         @NotNull(message = "El estado del cupón no puede estar vacío.")
         EstadoCupon estadoCupon
 
-){
-}
+){}

@@ -10,8 +10,11 @@ import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
+
 public class EmailServiceImp implements EmailService {
 
 
@@ -83,5 +86,4 @@ public class EmailServiceImp implements EmailService {
             throw new EmailException("Error en el envio del correo");
         }
     }
-
 }

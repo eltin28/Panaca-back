@@ -7,7 +7,6 @@ import Panaca.dto.cupon.*;
 import Panaca.dto.devolucion.DevolucionResponseDTO;
 import Panaca.dto.evento.CrearEventoDTO;
 import Panaca.dto.evento.EditarEventoDTO;
-import Panaca.dto.evento.ItemEventoDTO;
 import Panaca.exceptions.CuponException;
 import Panaca.exceptions.EventoException;
 import Panaca.exceptions.PQRException;
@@ -73,23 +72,6 @@ public class AdminController {
         }catch (Exception e){
             return ResponseEntity.badRequest().body(new MensajeDTO<>(false, e.getMessage()));
         }
-    }
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/evento-activos")
-    public ResponseEntity<Page<ItemEventoDTO>> getEventosActivos(@RequestParam(defaultValue = "0") int page,
-                                                                 @RequestParam(defaultValue = "3") int size){
-        PageRequest pageRequest= PageRequest.of(page, size);
-        Page<ItemEventoDTO> eventos = eventoService.getEventoActivos(pageRequest);
-        return ResponseEntity.ok(eventos);
-    }
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/evento-inactivos")
-    public ResponseEntity<Page<ItemEventoDTO>> getEventosInactivos(@RequestParam(defaultValue = "0") int page,
-                                                                   @RequestParam(defaultValue = "3") int size){
-        PageRequest pageRequest= PageRequest.of(page, size);
-        Page<ItemEventoDTO> eventos = eventoService.getEventosInactivos(pageRequest);
-        return ResponseEntity.ok(eventos);
-
     }
 
     //==================================== METODOS PQR =============================================//

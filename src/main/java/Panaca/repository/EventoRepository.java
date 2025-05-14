@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface EventoRepository extends MongoRepository<Evento, String> {
 
     //Metodo para encontrar un evento por nombre
-    Optional<Evento> findByNombre(String nombre);
+    List<Evento> findByNombre(String nombre);
 
     Page<Evento> getEventosByEstado(EstadoEvento estadoEvento, Pageable pageable);
 

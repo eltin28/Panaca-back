@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,6 +40,8 @@ import java.time.LocalDate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Validated
+
 public class OrdenServiceImp implements OrdenService {
 
     private final OrdenRepository ordenRepository;

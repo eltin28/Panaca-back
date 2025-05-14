@@ -17,5 +17,4 @@ public record EditarCuponDTO (
         LocalDateTime fechaApertura,
         @NotBlank TipoCupon tipoCupon,
         @NotBlank EstadoCupon estadoCupon
-){
-}
+){}

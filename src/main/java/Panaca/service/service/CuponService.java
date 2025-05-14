@@ -9,12 +9,10 @@ import Panaca.dto.cupon.*;
 import Panaca.exceptions.CuponException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
 public interface CuponService {
 
     void crearCupon(CrearCuponDTO cupon) throws CuponException;

@@ -10,12 +10,11 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public record InformacionCuponDTO(
-        @NotBlank @Min(3) @Max(30) String codigo,
-        @NotBlank @Min(5) @Max(50) String nombre,
-        @NotBlank float porcentajeDescuento,
-        @NotBlank @FutureOrPresent LocalDateTime fechaVencimiento,
+        String nombre,
+        String codigo,
+        float porcentajeDescuento,
+        LocalDateTime fechaVencimiento,
         LocalDateTime fechaApertura,
-        @NotBlank TipoCupon tipoCupon,
-        @NotBlank EstadoCupon estadoCupon
-) {
-}
+        TipoCupon tipoCupon,
+        EstadoCupon estadoCupon
+) {}

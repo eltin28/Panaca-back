@@ -13,6 +13,7 @@ import Panaca.repository.CuentaRepository;
 import Panaca.repository.PQRRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Validated
+
 public class PQRServiceImp implements PQRService {
 
     private final PQRRepository pqrRepository;

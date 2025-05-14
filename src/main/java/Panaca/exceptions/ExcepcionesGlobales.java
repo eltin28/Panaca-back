@@ -2,6 +2,7 @@ package Panaca.exceptions;
 
 import Panaca.dto.autenticacion.MensajeDTO;
 import Panaca.dto.autenticacion.ValidacionDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -37,4 +38,10 @@ public class ExcepcionesGlobales {
 
         return ResponseEntity.badRequest().body( new MensajeDTO<>(true, errores) );
     }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<String> handleFileNotFound(FileNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 }

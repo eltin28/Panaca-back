@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CuponRepository extends MongoRepository<Cupon, String> {
@@ -22,6 +23,6 @@ public interface CuponRepository extends MongoRepository<Cupon, String> {
     List<Cupon> findByDescuento(Float descuento);
     List<Cupon> findByTipo(TipoCupon tipo);
     List<Cupon> findByEstado(EstadoCupon estado);
-    Cupon findByCodigo(String codigo);
+    Optional<Cupon> findByCodigo(String codigo);
     Page<Cupon> findByEstado(EstadoCupon estado, Pageable pageable);
 }

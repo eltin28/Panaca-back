@@ -10,6 +10,7 @@ import Panaca.service.service.DevolucionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +19,8 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Validated
+
 public class DevolucionServiceImp implements DevolucionService {
 
     private final DevolucionRequestRepository devolucionRepo;

@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,10 +24,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Validated
+
 public class CuponServiceImp implements CuponService {
 
     private final CuponRepository cuponRepository;
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public void crearCupon(CrearCuponDTO cuponDTO) throws CuponException {
@@ -178,37 +181,27 @@ public class CuponServiceImp implements CuponService {
 
     @Override
     public Cupon aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException {
-        // Buscar el cupón por código
-        Optional<Cupon> cuponOpt = cuponRepository.findById(codigoCupon);
+        Cupon cupon = cuponRepository.findById(codigoCupon)
+                .orElseThrow(() -> new CuponException("Cupón no existe."));
 
-        // Verificar si el cupón existe
-        if (cuponOpt.isEmpty()) {
-            throw new CuponException("Cupón no existe.");
-        }
-
-        Cupon cupon = cuponOpt.get();
-
-        // Verificar si el cupón está disponible
         if (cupon.getEstado() != EstadoCupon.DISPONIBLE) {
             throw new CuponException("El cupón no está disponible.");
         }
 
-        // Verificar si el cupón ha expirado
         if (cupon.getFechaVencimiento().isBefore(fechaCompra)) {
             throw new CuponException("El cupón ha expirado.");
         }
 
-        // Verificar si el cupón es único y ya ha sido utilizado
         if (cupon.getTipo() == TipoCupon.UNICO && cupon.isUtilizado()) {
             throw new CuponException("El cupón ya ha sido utilizado.");
         }
 
-        // Si el cupón es único, marcarlo como utilizado y guardar la actualización
         if (cupon.getTipo() == TipoCupon.UNICO) {
             cupon.setUtilizado(true);
-            cuponRepository.save(cupon); // Guarda el cupón actualizado
-            return cupon;
+            cuponRepository.save(cupon);
         }
+
         return cupon;
     }
+
 }

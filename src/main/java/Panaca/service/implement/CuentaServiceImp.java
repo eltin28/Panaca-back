@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 
@@ -30,6 +31,8 @@ import java.time.LocalDateTime;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Validated
+
 public class CuentaServiceImp implements CuentaService {
 
     private final CuentaRepository cuentaRepository;

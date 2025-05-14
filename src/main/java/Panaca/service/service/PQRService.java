@@ -5,13 +5,10 @@ import Panaca.dto.PQR.InformacionPQRDTO;
 import Panaca.dto.PQR.ItemPQRDTO;
 import Panaca.dto.PQR.ResponderPQRDTO;
 import Panaca.model.documents.PQR;
-import Panaca.dto.PQR.*;
 import Panaca.exceptions.PQRException;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public interface PQRService {
 
     void crearPQR(CrearPQRDTO pqrDTO) throws PQRException;

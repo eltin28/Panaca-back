@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Validated
+
 public class EventoServiceImp implements EventoService {
 
     private final EventoRepository eventoRepo;
@@ -113,50 +116,14 @@ public class EventoServiceImp implements EventoService {
         for (Evento evento : eventos) {
             itemEventoDTO.add(new ItemEventoDTO(
                     evento.getId(),
-                    evento.getImagenPortada(),
                     evento.getNombre(),
                     evento.getDescripcion(),
+                    evento.getImagenPortada(),
                     evento.getTipo(),
                     evento.getPrecio()
             ));
         }
         return itemEventoDTO;
-    }
-
-    @Override
-    public Page<ItemEventoDTO> getEventosInactivos(Pageable pageable){
-        Page<Evento> eventos = eventoRepo.getEventosByEstado(EstadoEvento.INACTIVO, pageable);
-
-        // Transformar cada Evento en un ItemEventoDTO
-
-        return eventos.map(evento -> new ItemEventoDTO(
-                evento.getId(),
-                evento.getImagenPortada(),
-                evento.getNombre(),
-                evento.getDescripcion(),
-                evento.getTipo(),
-                evento.getPrecio()
-        ));
-    }
-
-    /**
-     * Metodo para obtener solamente los eventos que se encuentran activo ahora mismo para el index de los usuarios
-     * return
-     */
-    @Override
-    public Page<ItemEventoDTO> getEventoActivos(Pageable pageable){
-        Page<Evento> eventos = eventoRepo.getEventosByEstado(EstadoEvento.ACTIVO, pageable);
-
-        // Transformar cada Evento en un ItemEventoDTO
-
-        return eventos.map(evento -> new ItemEventoDTO(
-                evento.getId(),
-                evento.getImagenPortada(),
-                evento.getNombre(),
-                evento.getDescripcion(),
-                evento.getTipo(),
-                evento.getPrecio()
-        ));
     }
 
     @Override
@@ -169,6 +136,10 @@ public class EventoServiceImp implements EventoService {
 
         if (filtro.tipoEvento() != null) {
             criterios.add(Criteria.where("tipo").is(filtro.tipoEvento()));
+        }
+
+        if (filtro.estadoEvento() != null) {
+            criterios.add(Criteria.where("estado").is(filtro.estadoEvento()));
         }
 
         Query query = new Query();
@@ -191,7 +162,8 @@ public class EventoServiceImp implements EventoService {
     private EventoFiltradoDTO convertirAEventoFiltradoDTO(Evento evento) {
         return new EventoFiltradoDTO(
                 evento.getNombre(),
-                evento.getTipo()
+                evento.getTipo(),
+                evento.getEstado()
         );
     }
 }

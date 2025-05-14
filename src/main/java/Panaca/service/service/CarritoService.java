@@ -5,12 +5,10 @@ import Panaca.dto.carrito.DetalleCarritoDTO;
 import Panaca.dto.carrito.InformacionEventoCarritoDTO;
 import Panaca.model.documents.Carrito;
 import Panaca.exceptions.CarritoException;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
 public interface CarritoService {
 
     void crearCarrito(CrearCarritoDTO carritoDTO) throws CarritoException;
