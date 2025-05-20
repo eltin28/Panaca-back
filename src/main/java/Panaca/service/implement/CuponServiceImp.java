@@ -181,7 +181,7 @@ public class CuponServiceImp implements CuponService {
 
     @Override
     public Cupon aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException {
-        Cupon cupon = cuponRepository.findById(codigoCupon)
+        Cupon cupon = cuponRepository.findByCodigo(codigoCupon)
                 .orElseThrow(() -> new CuponException("Cupón no existe."));
 
         if (cupon.getEstado() != EstadoCupon.DISPONIBLE) {

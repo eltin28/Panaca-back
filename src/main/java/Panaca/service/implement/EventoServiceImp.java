@@ -7,8 +7,6 @@ import Panaca.service.service.EventoService;
 import Panaca.exceptions.EventoException;
 import Panaca.repository.EventoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;

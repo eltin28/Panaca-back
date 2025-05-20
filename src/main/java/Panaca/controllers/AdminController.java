@@ -188,14 +188,14 @@ public class AdminController {
     }
 
     //=========================================== METODOS IMAGENES ===============================================//
-
+/*
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/subir")
     public ResponseEntity<MensajeDTO<String>> subir(@RequestParam("imagen") MultipartFile imagen) throws Exception {
         String respuesta = imagesService.subirImagen(imagen);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, respuesta));
     }
-
+*/
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/eliminar/{idImagen}")
     public ResponseEntity<MensajeDTO<String>> eliminar(@PathVariable String idImagen)  throws Exception{

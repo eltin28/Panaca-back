@@ -1,5 +1,6 @@
 package Panaca.service.implement;
 
+import Panaca.configs.SmtpProperties;
 import Panaca.dto.email.EmailDTO;
 import Panaca.service.service.EmailService;
 import Panaca.exceptions.EmailException;
@@ -8,6 +9,7 @@ import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +19,11 @@ import org.springframework.validation.annotation.Validated;
 
 public class EmailServiceImp implements EmailService {
 
+    private final SmtpProperties smtpProperties;
+
+    public EmailServiceImp(SmtpProperties smtpProperties) {
+        this.smtpProperties = smtpProperties;
+    }
 
     @Override
     @Async
@@ -68,14 +75,18 @@ public class EmailServiceImp implements EmailService {
                 "</html>";
 
         Email email = EmailBuilder.startingBlank()
-                .from("infounieventos10@gmail.com")
+                .from(smtpProperties.getUsername())
                 .to(emailDTO.destinatario())
                 .withSubject(emailDTO.asunto())
                 .withHTMLText(htmlContent)
                 .buildEmail();
 
         try (Mailer mailer = MailerBuilder
-                .withSMTPServer("smtp.gmail.com", 587, "infounieventos10@gmail.com", "knxwnhhkbzpcwvib")
+                .withSMTPServer(
+                        smtpProperties.getHost(),
+                        smtpProperties.getPort(),
+                        smtpProperties.getUsername(),
+                        smtpProperties.getPassword())
                 .withTransportStrategy(TransportStrategy.SMTP_TLS)
                 .withDebugLogging(true)
                 .buildMailer()) {

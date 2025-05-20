@@ -1,43 +1,48 @@
 package Panaca.service.implement;
 
-import Panaca.exceptions.FileNotFoundException;
+import Panaca.configs.CloudinaryProperties;
 import Panaca.service.service.ImagesService;
-import com.google.cloud.storage.*;
-import com.google.firebase.cloud.StorageClient;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.UUID;
+import org.springframework.validation.annotation.Validated;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
 
 @Service
 @Validated
-
 public class ImagesServiceImp implements ImagesService {
 
-    @Override
-    public String subirImagen(MultipartFile multipartFile) throws Exception {
-        Bucket bucket = StorageClient.getInstance().bucket();
+    private final Cloudinary cloudinary;
 
-        if (multipartFile.isEmpty()) {
-            throw new IllegalArgumentException("El archivo está vacío");
-        }
-
-        String fileName = UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
-        Blob blob = bucket.create(fileName, multipartFile.getInputStream(), multipartFile.getContentType());
-
-        return String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
-                bucket.getName(),
-                blob.getName());
+    public ImagesServiceImp(CloudinaryProperties properties) {
+        this.cloudinary = new Cloudinary(ObjectUtils.asMap(
+                "cloud_name", properties.getCloudName(),
+                "api_key", properties.getApiKey(),
+                "api_secret", properties.getApiSecret()
+        ));
     }
 
     @Override
-    public void eliminarImagen(String nombreImagen) throws Exception {
-        Bucket bucket = StorageClient.getInstance().bucket();
-        Blob blob = bucket.get(nombreImagen);
-        if (blob == null || !blob.exists()) {
-            throw new FileNotFoundException("No se encontró la imagen: " + nombreImagen);
+    public Map subirImagen(MultipartFile imagen) throws Exception {
+        File file = convertir(imagen);
+        return cloudinary.uploader().upload(file, ObjectUtils.asMap("folder", "Panaca"));
+    }
+
+    @Override
+    public Map eliminarImagen(String idImagen) throws Exception {
+        return cloudinary.uploader().destroy(idImagen, ObjectUtils.emptyMap());
+    }
+
+    private File convertir(MultipartFile imagen) throws IOException {
+        File file = File.createTempFile("upload-", imagen.getOriginalFilename());
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(imagen.getBytes());
         }
-        blob.delete();
+        return file;
     }
 }
-

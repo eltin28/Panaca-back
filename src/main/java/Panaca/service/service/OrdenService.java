@@ -11,6 +11,7 @@ import Panaca.exceptions.OrdenException;
 
 import java.util.Map;
 import com.mercadopago.resources.preference.Preference;
+import jakarta.validation.Valid;
 
 public interface OrdenService {
 
@@ -22,7 +23,7 @@ public interface OrdenService {
 
     Orden obtenerOrdenPorId(String ordenId) throws OrdenException;
 
-    void actualizarOrden (String id, EditarOrdenDTO ordenDTO) throws OrdenException, CuponException;
+    void actualizarOrden (String id,@Valid EditarOrdenDTO ordenDTO) throws OrdenException, CuponException;
 
     void eliminarOrden(String id) throws OrdenException;
 

@@ -27,4 +27,3 @@ public class Donation {
 
     private List<DonationItem> items;
 }
-

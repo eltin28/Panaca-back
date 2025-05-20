@@ -2,15 +2,15 @@ package Panaca.service.implement;
 
 import Panaca.configs.MercadoPagoProperties;
 import Panaca.dto.cuenta.InformacionCuentaDTO;
+import Panaca.dto.email.EmailDTO;
 import Panaca.dto.orden.*;
 import Panaca.exceptions.*;
-import Panaca.model.documents.Carrito;
-import Panaca.model.documents.Cupon;
-import Panaca.model.documents.Evento;
-import Panaca.model.documents.Orden;
+import Panaca.model.documents.*;
 import Panaca.model.vo.DetalleCarrito;
 import Panaca.model.vo.DetalleOrden;
 import Panaca.model.vo.Pago;
+import Panaca.repository.CuentaRepository;
+import Panaca.repository.DonationRepository;
 import Panaca.service.service.*;
 import Panaca.repository.CarritoRepository;
 import Panaca.repository.OrdenRepository;
@@ -45,10 +45,13 @@ import java.time.LocalDate;
 public class OrdenServiceImp implements OrdenService {
 
     private final OrdenRepository ordenRepository;
-    private final EventoService eventoService;
+    private final CuentaRepository cuentaRepository;
     private final CarritoRepository carritoRepository;
+    private final DonationRepository donationRepository;
+    private final EventoService eventoService;
     private final CuentaService cuentaService;
     private final CuponService cuponService;
+    private final EmailService emailService;
     private final MercadoPagoProperties mercadoPagoProperties;
 
     @Override
@@ -185,7 +188,7 @@ public class OrdenServiceImp implements OrdenService {
     // Obtener una orden por ID
     @Override
     public Orden obtenerOrdenPorId(String id) throws OrdenException {
-        return ordenRepository.findById(id).orElseThrow(() -> new OrdenException("Orden no encontrada"));
+        return ordenRepository.findById(id).orElseThrow(() -> new OrdenException("No se encontró la orden con el ID: " + id));
     }
 
     @Override
@@ -254,7 +257,7 @@ public class OrdenServiceImp implements OrdenService {
                 .backUrls(backUrls)
                 .items(itemsPasarela)
                 .metadata(Map.of("id_orden", ordenGuardada.getId()))
-                .notificationUrl("https://de93-2800-e2-9880-a18-6405-c7c4-bed9-4dde.ngrok-free.app")
+                .notificationUrl(mercadoPagoProperties.getNotificationUrl())
                 .build();
 
         PreferenceClient client = new PreferenceClient();
@@ -289,6 +292,36 @@ public class OrdenServiceImp implements OrdenService {
 
             PaymentClient client = new PaymentClient();
             Payment payment = client.get(idPago);
+            Map<String, Object> metadata = payment.getMetadata();
+
+            // Manejo de donación
+            if (metadata.containsKey("id_donacion")) {
+                String idDonacion = metadata.get("id_donacion").toString();
+                Donation donacion = donationRepository.findById(idDonacion)
+                        .orElseThrow(() -> new RuntimeException("Donación no encontrada"));
+
+                Cuenta cuenta = cuentaRepository.findById(donacion.getIdDonante())
+                        .orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+
+                String resumen = donacion.getItems().stream()
+                        .map(i -> "- " + i.getCantidadBultos() + " bultos para " + i.getTipoAnimal().getDisplayName())
+                        .collect(Collectors.joining("<br>"));
+
+                String cuerpo = "Hola " + cuenta.getNombre() + ",<br><br>"
+                        + "Gracias por tu donación. Contribuiste con:<br>"
+                        + resumen + "<br><br>"
+                        + "Total donado: $" + donacion.getTotal() + " COP.<br>"
+                        + "Tu apoyo marca la diferencia para nuestros animales. 🐾<br><br>"
+                        + "— El equipo de Panaca";
+
+                EmailDTO email = new EmailDTO(
+                        cuenta.getEmail(),
+                        "Gracias por tu donación",
+                        cuerpo
+                );
+
+                emailService.enviarCorreo(email);
+            }
 
             // Extraer ID de la orden desde metadata
             Object idOrdenObj = payment.getMetadata().get("id_orden");

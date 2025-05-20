@@ -10,4 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class MercadoPagoProperties {
     private String token;
+    private String notificationUrl;
 }

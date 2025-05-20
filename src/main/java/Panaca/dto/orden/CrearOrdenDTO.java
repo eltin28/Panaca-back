@@ -1,10 +1,9 @@
 package Panaca.dto.orden;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.PastOrPresent;
-import org.checkerframework.checker.optional.qual.Present;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +18,7 @@ public record CrearOrdenDTO(
         String codigoPasarela,
 
         @NotNull(message = "La fecha de la orden es obligatoria.")
-        @Present
+        @FutureOrPresent
         LocalDate fecha,
 
         @NotNull(message = "La lista de detalles de la orden no puede estar vacía.")

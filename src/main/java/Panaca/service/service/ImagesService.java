@@ -1,9 +1,12 @@
 package Panaca.service.service;
 
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
+
 public interface ImagesService {
 
-    String subirImagen(MultipartFile imagen) throws Exception;
-    void eliminarImagen(String nombreImagen) throws Exception;
+    Map subirImagen(MultipartFile imagen) throws Exception;
+    Map eliminarImagen(String idImagen) throws Exception;
 
 }

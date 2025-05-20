@@ -35,8 +35,7 @@ public class CarritoServiceTest {
 
     @Autowired
     private EventoRepository eventoRepository;
-
-    /*
+/*
     @Test
     public void crearCarrito_exitosamente() {
         String idUsuario = UUID.randomUUID().toString();
@@ -246,5 +245,5 @@ public class CarritoServiceTest {
         Exception ex = assertThrows(RuntimeException.class, () -> carritoService.calcularTotalCarrito(idUsuario));
         assertTrue(ex.getMessage().toLowerCase().contains("evento no encontrado"));
     }
-     */
+    */
 }
