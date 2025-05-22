@@ -45,7 +45,7 @@ public class DonationServiceTest {
         cuenta.setRol(Rol.CLIENTE);
         cuenta = cuentaRepository.save(cuenta);
     }
-/*
+
     @Test
     void crearDonacion_datosValidos_guardaCorrectamente() {
         DonationItemDTO item = new DonationItemDTO(AnimalType.GATO, 2);
@@ -102,5 +102,4 @@ public class DonationServiceTest {
 
         assertEquals("No se encontró la cuenta con ID: " + idFalso, ex.getMessage());
     }
- */
 }

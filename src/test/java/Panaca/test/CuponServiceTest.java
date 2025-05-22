@@ -28,7 +28,7 @@ public class CuponServiceTest {
 
     @Autowired
     private CuponRepository cuponRepository;
-/*
+
     @Test
     public void crearCupon_exitosamente() {
         String codigo = UUID.randomUUID().toString().substring(0, 10);
@@ -356,5 +356,4 @@ public class CuponServiceTest {
         );
         assertTrue(ex.getMessage().toLowerCase().contains("utilizado"));
     }
-*/
 }

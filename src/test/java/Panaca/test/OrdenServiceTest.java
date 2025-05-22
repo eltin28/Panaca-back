@@ -103,7 +103,6 @@ public class OrdenServiceTest {
         carrito.setItems(List.of(detalleCarrito));
         carritoRepository.save(carrito);
     }
- /*
     @Test
     void realizarPago_idOrdenInexistente_lanzaExcepcion() {
         String idInvalido = new ObjectId().toString();
@@ -204,7 +203,7 @@ public class OrdenServiceTest {
     void crearOrdenDesdeCarrito_conCuponValido_aplicaDescuento() {
         Cupon cupon = new Cupon();
         cupon.setNombre("Cupon de prueba");
-        cupon.setCodigo("DESCUENZATO");
+        cupon.setCodigo("PRUEBA21");
         cupon.setDescuento(10f);
         cupon.setEstado(EstadoCupon.DISPONIBLE);
         cupon.setTipo(TipoCupon.MULTIPLE);
@@ -212,7 +211,7 @@ public class OrdenServiceTest {
         cupon.setFechaVencimiento(LocalDateTime.now().plusDays(5));
         cuponRepository.save(cupon);
 
-        assertDoesNotThrow(() -> ordenService.crearOrdenDesdeCarrito(cuenta.getId(), "DESC10", "MP-004"));
+        assertDoesNotThrow(() -> ordenService.crearOrdenDesdeCarrito(cuenta.getId(), "PRUEBA21", "MP-004"));
     }
 
     @Test
@@ -251,7 +250,6 @@ public class OrdenServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("fecha"));
     }
 
-
     @Test
     void crearOrdenDesdeCarrito_cuentaSinCarrito_lanzaExcepcion() {
         cuentaRepository.deleteAll(); // Simula un usuario sin datos relacionados
@@ -261,5 +259,4 @@ public class OrdenServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("carrito"));
     }
 
-  */
 }

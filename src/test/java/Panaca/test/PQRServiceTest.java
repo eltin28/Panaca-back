@@ -35,7 +35,7 @@ public class PQRServiceTest {
     private CuentaRepository cuentaRepository;
 
     private String idUsuario;
-/*
+
     @BeforeEach
     public void setup() {
         Cuenta cuenta = new Cuenta();
@@ -168,5 +168,4 @@ public class PQRServiceTest {
         Exception ex = assertThrows(PQRException.class, () -> pqrService.listarPQRs());
         assertTrue(ex.getMessage().contains("No hay PQRs"));
     }
-*/
 }
