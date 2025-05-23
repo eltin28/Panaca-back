@@ -23,10 +23,6 @@ public interface CuponService {
 
     InformacionCuponDTO obtenerInformacionCupon(String id) throws CuponException;
 
-    Page<Cupon> getAllDisponibles(PageRequest pageRequest);
-
-    Page<Cupon> getAllNoDisponibles(PageRequest pageRequest);
-
     List<ItemsCuponDTO> obtenerCuponesFiltrados(ItemsCuponFiltroDTO filtro);
 
     Cupon aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException;

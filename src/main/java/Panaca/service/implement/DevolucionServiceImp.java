@@ -94,7 +94,7 @@ public class DevolucionServiceImp implements DevolucionService {
     }
 
     @Override
-    public DevolucionResponseDTO aprobar(String id) {
+    public DevolucionResponseDTO cambiarEstado(String id, EstadoDevolucion nuevoEstado) {
         DevolucionRequest request = devolucionRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
@@ -102,20 +102,7 @@ public class DevolucionServiceImp implements DevolucionService {
             throw new RuntimeException("La solicitud ya fue procesada");
         }
 
-        request.setEstado(EstadoDevolucion.APROBADA);
-        return toResponse(devolucionRepo.save(request));
-    }
-
-    @Override
-    public DevolucionResponseDTO rechazar(String id) {
-        DevolucionRequest request = devolucionRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
-
-        if (request.getEstado() != EstadoDevolucion.PENDIENTE) {
-            throw new RuntimeException("La solicitud ya fue procesada");
-        }
-
-        request.setEstado(EstadoDevolucion.RECHAZADA);
+        request.setEstado(nuevoEstado);
         return toResponse(devolucionRepo.save(request));
     }
 
@@ -128,4 +115,5 @@ public class DevolucionServiceImp implements DevolucionService {
                 r.getEstado()
         );
     }
+
 }

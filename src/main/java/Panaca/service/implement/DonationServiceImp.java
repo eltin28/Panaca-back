@@ -124,4 +124,22 @@ public class DonationServiceImp implements DonationService {
                                 .toList()
                 )).toList();
     }
+
+    @Override
+    public List<MostrarDonacionDTO> obtenerTodasLasDonaciones() {
+        return donationRepo.findAllByOrderByFechaDesc().stream()
+                .map(donacion -> new MostrarDonacionDTO(
+                        donacion.getId(),
+                        donacion.getFecha(),
+                        donacion.getTotal(),
+                        donacion.getItems().stream()
+                                .map(item -> new ItemDonacionDTO(
+                                        item.getTipoAnimal().getDisplayName(),
+                                        item.getCantidadBultos(),
+                                        item.getSubtotal()
+                                ))
+                                .toList()
+                )).toList();
+    }
+
 }

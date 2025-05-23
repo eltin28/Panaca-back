@@ -171,15 +171,6 @@ public class CuponServiceImp implements CuponService {
     }
 
     @Override
-    public Page<Cupon> getAllDisponibles(PageRequest pageRequest){
-        return cuponRepository.findByEstado(EstadoCupon.DISPONIBLE,pageRequest);
-    }
-    @Override
-    public Page<Cupon> getAllNoDisponibles(PageRequest pageRequest){
-        return cuponRepository.findByEstado(EstadoCupon.NO_DISPONIBLE,pageRequest);
-    }
-
-    @Override
     public Cupon aplicarCupon(String codigoCupon, LocalDateTime fechaCompra) throws CuponException {
         Cupon cupon = cuponRepository.findByCodigo(codigoCupon)
                 .orElseThrow(() -> new CuponException("Cupón no existe."));

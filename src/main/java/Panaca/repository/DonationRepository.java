@@ -8,4 +8,6 @@ import java.util.List;
 public interface DonationRepository extends MongoRepository<Donation, String> {
     List<Donation> findByIdDonanteOrderByFechaDesc(String idDonante);
 
+    List<Donation> findAllByOrderByFechaDesc();
+
 }

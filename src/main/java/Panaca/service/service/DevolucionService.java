@@ -2,6 +2,7 @@ package Panaca.service.service;
 
 import Panaca.dto.devolucion.DevolucionRequestDTO;
 import Panaca.dto.devolucion.DevolucionResponseDTO;
+import Panaca.model.enums.EstadoDevolucion;
 
 import java.util.List;
 
@@ -13,7 +14,6 @@ public interface DevolucionService {
 
     List<DevolucionResponseDTO> listarTodas();
 
-    DevolucionResponseDTO aprobar(String id);
+    DevolucionResponseDTO cambiarEstado(String id, EstadoDevolucion nuevoEstado);
 
-    DevolucionResponseDTO rechazar(String id);
 }

@@ -14,4 +14,6 @@ public interface DonationService {
 
     List<MostrarDonacionDTO> obtenerHistorialDonaciones(String idCuenta);
 
+    List<MostrarDonacionDTO> obtenerTodasLasDonaciones();
+
 }

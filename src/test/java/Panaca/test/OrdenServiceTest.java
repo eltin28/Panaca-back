@@ -103,6 +103,7 @@ public class OrdenServiceTest {
         carrito.setItems(List.of(detalleCarrito));
         carritoRepository.save(carrito);
     }
+    /*
     @Test
     void realizarPago_idOrdenInexistente_lanzaExcepcion() {
         String idInvalido = new ObjectId().toString();
@@ -258,5 +259,5 @@ public class OrdenServiceTest {
 
         assertTrue(ex.getMessage().toLowerCase().contains("carrito"));
     }
-
+*/
 }

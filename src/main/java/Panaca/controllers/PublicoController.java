@@ -31,24 +31,40 @@ public class PublicoController {
     @Autowired
     EventoService eventoService;
 
-    //==================================== METODOS CUENTA =============================================//
-
-
-
     //==================================== METODOS EVENTO =============================================//
 
+    /**
+     * Filtra los eventos públicos según nombre, tipo o estado.
+     *
+     * @param filtro DTO con los criterios de filtrado (nombre, tipo, estado).
+     * @return ResponseEntity con la lista de eventos que cumplen con los filtros.
+     * @throws EventoException si ocurre un error al filtrar los eventos.
+     */
     @PostMapping("/filtrar-eventos")
     public ResponseEntity<MensajeDTO<List<EventoFiltradoDTO>>> filtrarEventos(@RequestBody EventoFiltradoDTO filtro) throws EventoException {
         List<EventoFiltradoDTO> eventosFiltrados = eventoService.filtrarEventos(filtro);
         return ResponseEntity.ok(new MensajeDTO<>(true, eventosFiltrados));
     }
 
+    /**
+     * Lista todos los eventos públicos disponibles.
+     *
+     * @return ResponseEntity con la lista de eventos representados como ItemEventoDTO.
+     * @throws EventoException si ocurre un error durante la consulta.
+     */
     @GetMapping("/listar-eventos")
     public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> listarEventos() throws EventoException {
         List<ItemEventoDTO> eventos = eventoService.listarEventos();
         return ResponseEntity.ok(new MensajeDTO<>(false, eventos));
     }
 
+    /**
+     * Obtiene la información detallada de un evento público por su ID.
+     *
+     * @param id Identificador del evento.
+     * @return ResponseEntity con el objeto Evento correspondiente.
+     * @throws EventoException si no se encuentra el evento o hay un error en la consulta.
+     */
     @GetMapping("/obtener-evento/{id}")
     public ResponseEntity<Evento> obtenerInfoEvento(@Valid @PathVariable("id") String id) throws EventoException {
         return ResponseEntity.ok(eventoService.obtenerInformacionEvento(id));
